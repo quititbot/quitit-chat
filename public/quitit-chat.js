@@ -1,12 +1,21 @@
-(function(){
-  const API_BASE = ""; // same origin by default; if hosting elsewhere, set full URL
-
-  const BRAND = {
+ (function () {
+  const API_BASE = "https://quitit-chat.vercel.app/"; // <-- your Vercel URL
+  // ...
+  async function ask(text){
+    const r = await fetch(`${API_BASE}/api/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: text })
+    });
+    // ...
+  }
+     const BRAND = {
     green: "#1C3A3B",
     orange: "#FF5B00",
     chipBg: "#EEFFBD",
     chipText: "#1C3A3B"
-  };
+})();
+
 
   const style = document.createElement("style");
   style.textContent = `
