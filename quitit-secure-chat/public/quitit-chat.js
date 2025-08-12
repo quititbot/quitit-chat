@@ -1,5 +1,6 @@
 (function(){
-  const API_BASE = ""; // same origin by default; if hosting elsewhere, set full URL
+  const API_BASE = "https://quitit-chat.vercel.app";
+
 
   const BRAND = {
     green: "#1C3A3B",
