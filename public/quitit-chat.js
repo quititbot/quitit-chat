@@ -1,21 +1,19 @@
- (function () {
-  const API_BASE = "https://quitit-chat.vercel.app/"; // <-- your Vercel URL
-  // ...
-  async function ask(text){
-    const r = await fetch(`${API_BASE}/api/chat`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: text })
-    });
-    // ...
-  }
-     const BRAND = {
+// /public/quitit-chat.js
+(function () {
+  console.log("✅ quitit-chat.js loaded");
+
+  // If we're on Shopify, use your fixed Vercel domain.
+  // Otherwise (e.g., Vercel preview), use same-origin so previews work.
+  const PROD_API = "https://quitit-chat.vercel.app"; // <— your Vercel domain (no trailing slash)
+  const isShopify = /myshopify\.com|shopify\.com/i.test(location.hostname);
+  const API_BASE = isShopify ? PROD_API : window.location.origin;
+
+  const BRAND = {
     green: "#1C3A3B",
     orange: "#FF5B00",
     chipBg: "#EEFFBD",
-    chipText: "#1C3A3B"
-})();
-
+    chipText: "#1C3A3B",
+  };
 
   const style = document.createElement("style");
   style.textContent = `
@@ -41,16 +39,14 @@
   `;
   document.head.appendChild(style);
 
-  // Create launcher
   const launch = document.createElement("button");
   launch.className = "qi-launch";
   const logo = document.createElement("img");
   logo.alt = "QUIT IT";
-  logo.src = "https://via.placeholder.com/60x60.png?text=QI"; // replace with your hosted logo if desired
+  logo.src = "https://via.placeholder.com/60x60.png?text=QI";
   launch.appendChild(logo);
   document.body.appendChild(launch);
 
-  // Chat window
   const box = document.createElement("div");
   box.className = "qi-box";
   box.innerHTML = `
@@ -73,7 +69,7 @@
   const input = box.querySelector("input");
   const sendBtn = box.querySelector("button");
 
-  function push(role, text){
+  function push(role, text) {
     const row = document.createElement("div");
     row.className = "qi-row " + (role === "user" ? "qi-user" : "qi-bot");
     const b = document.createElement("div");
@@ -84,7 +80,7 @@
     body.scrollTop = body.scrollHeight;
   }
 
-  function sampleQuickQuestions(){
+  function sampleQuickQuestions() {
     const all = [
       "How long do the Flavour Cores last?",
       "Does it feel like smoking a cigarette?",
@@ -107,14 +103,12 @@
       "What does “Sold Out” mean?",
       "When will a sold-out item be back?"
     ];
-    const shuffled = all.sort(()=>Math.random()-0.5);
-    return shuffled.slice(0,6);
+    return all.sort(() => Math.random() - 0.5).slice(0, 6);
   }
 
   function renderChips() {
     chips.innerHTML = "";
-    const qs = sampleQuickQuestions();
-    qs.forEach(q => {
+    sampleQuickQuestions().forEach((q) => {
       const btn = document.createElement("button");
       btn.className = "qi-chip";
       btn.textContent = q;
@@ -123,26 +117,36 @@
     });
   }
 
-  async function ask(text){
+  async function ask(text) {
     push("user", text);
     chips.innerHTML = "";
-    try{
-      const r = await fetch((API_BASE || "") + "/api/chat", {
+
+    try {
+      const r = await fetch(`${API_BASE}/api/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text })
+        body: JSON.stringify({ message: text })
       });
-      const data = await r.json();
-      const answer = data && data.answer ? data.answer :
+
+      if (!r.ok) {
+        const errText = await r.text().catch(() => "");
+        console.error("API error", r.status, errText);
+        throw new Error(`API ${r.status}`);
+      }
+
+      const data = await r.json().catch(() => ({}));
+      console.log("API reply:", data);
+      const answer = data?.reply || data?.answer ||
         "I’m not 100% sure on that one! Could you email our team at support@quititaus.com.au so we can help you out?";
       push("assistant", answer);
       renderChips();
-    }catch(e){
+    } catch (e) {
+      console.error(e);
       push("assistant", "Hmm, something went wrong. Please email support@quititaus.com.au and we’ll help right away.");
+      renderChips();
     }
   }
 
-  // Events
   launch.onclick = () => {
     const visible = box.style.display === "block";
     box.style.display = visible ? "none" : "block";
@@ -151,14 +155,19 @@
       renderChips();
     }
   };
+
   sendBtn.onclick = () => {
     const t = input.value.trim();
     if (!t) return;
     input.value = "";
     ask(t);
   };
-  input.addEventListener("keydown", (e)=>{
-    if (e.key === "Enter") { e.preventDefault(); sendBtn.click(); }
-  });
 
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      sendBtn.click();
+    }
+  });
 })();
+
