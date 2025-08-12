@@ -1,5 +1,8 @@
 (function(){
-  const API_BASE = ""; // same origin by default; if hosting elsewhere, set full URL
+  // 1) Robust API base (Shopify -> prod domain; elsewhere -> same origin)
+  const PROD_API = "https://quitit-chat.vercel.app"; // no trailing slash
+  const isShopify = /myshopify\.com|shopify\.com/i.test(location.hostname);
+  const API_BASE = isShopify ? PROD_API : (window.location.origin || "");
 
   const BRAND = {
     green: "#1C3A3B",
