@@ -2,12 +2,17 @@
   "version": 2,
   "builds": [
     {
-      "src": "public/quitit-chat.js",
+      "src": "public/**/*",
       "use": "@vercel/static"
     },
     {
       "src": "api/**/*.js",
-      "use": "@vercel/node@2.9.0"
+      "use": "@vercel/node"
     }
-  ]
+  ],
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "nodejs20.x"
+    }
+  }
 }
