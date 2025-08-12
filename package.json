@@ -1,13 +1,13 @@
-{
-  "name": "quitit-chat",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "dev": "vercel dev",
-    "start": "vercel dev"
-  },
-  "dependencies": {
-    "openai": "^4.57.0",
-    "resend": "^3.0.0"
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).send('Method Not Allowed');
+  }
+
+  try {
+    // Example response — replace with your OpenAI logic
+    return res.status(200).json({ reply: "pong from /api/chat" });
+  } catch (err) {
+    console.error('chat error:', err);
+    return res.status(500).json({ error: err.message || 'Server error' });
   }
 }
