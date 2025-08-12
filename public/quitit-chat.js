@@ -14,7 +14,7 @@
     chipText: "#1C3A3B",
   };
 
-  // --- Styles ---
+  // --- Styles (wrapped in backticks) ---
   const style = document.createElement("style");
   style.textContent = `
   .qi-launch{position:fixed;right:18px;bottom:18px;width:56px;height:56px;border-radius:50%;background:${BRAND.green};display:grid;place-items:center;z-index:999999;border:none;box-shadow:0 10px 25px rgba(0,0,0,.18);cursor:pointer;transition:transform .15s}
@@ -45,11 +45,11 @@
   launch.setAttribute("aria-label", "Open chat");
   const logo = document.createElement("img");
   logo.alt = "QUIT IT";
-  logo.src = "https://via.placeholder.com/60x60.png?text=QI"; // swap to your logo if you have one
+  logo.src = "https://via.placeholder.com/60x60.png?text=QI"; // replace with your logo if desired
   launch.appendChild(logo);
   document.body.appendChild(launch);
 
-  // Chat window
+  // Chat window (wrapped in backticks)
   const box = document.createElement("div");
   box.className = "qi-box";
   box.innerHTML = `
@@ -108,7 +108,7 @@
     });
   }
 
-  // --- Chat request (JSON; tolerant to different response shapes) ---
+  // Chat request (expects JSON response)
   async function doAsk(text){
     push("user", text);
     chips.innerHTML = "";
@@ -116,7 +116,7 @@
       const r = await fetch(`${API_BASE}/api/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text }) // <- your API expects 'message'
+        body: JSON.stringify({ message: text }) // your API expects 'message'
       });
       const data = await r.json().catch(()=> ({}));
       const answer =
@@ -150,6 +150,11 @@
   input.addEventListener("keydown", (e)=>{
     if (e.key === "Enter") { e.preventDefault(); sendBtn.click(); }
   });
+
+  // Expose for quick debugging
+  window.QI_CHAT = { API_BASE, open: () => launch.click() };
+})();
+
 
   // Expose small API for debugging
   window.QI_CHAT = { API_BASE, BRAND, open: () => { launch.click(); } };
