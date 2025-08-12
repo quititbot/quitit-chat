@@ -1,19 +1,22 @@
-// /public/quitit-chat.js
-(function () {
-  console.log("✅ quitit-chat.js loaded");
-
-  // 1) Set this to your Vercel URL (no trailing slash)
-  const API_BASE = "https://quitit-chat.vercel.app";
-
-  // 2) Brand colours
-  const BRAND = {
+ (function () {
+  const API_BASE = "https://quitit-chat.vercel.app/"; // <-- your Vercel URL
+  // ...
+  async function ask(text){
+    const r = await fetch(`${API_BASE}/api/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: text })
+    });
+    // ...
+  }
+     const BRAND = {
     green: "#1C3A3B",
     orange: "#FF5B00",
     chipBg: "#EEFFBD",
-    chipText: "#1C3A3B",
-  };
+    chipText: "#1C3A3B"
+})();
 
-  // 3) Styles
+
   const style = document.createElement("style");
   style.textContent = `
   .qi-launch{position:fixed;right:18px;bottom:18px;width:56px;height:56px;border-radius:50%;background:${BRAND.green};display:grid;place-items:center;z-index:999999;border:none;box-shadow:0 10px 25px rgba(0,0,0,.18);cursor:pointer;transition:transform .15s}
@@ -38,16 +41,16 @@
   `;
   document.head.appendChild(style);
 
-  // 4) Launcher
+  // Create launcher
   const launch = document.createElement("button");
   launch.className = "qi-launch";
   const logo = document.createElement("img");
   logo.alt = "QUIT IT";
-  logo.src = "https://via.placeholder.com/60x60.png?text=QI"; // replace with your logo URL if you want
+  logo.src = "https://via.placeholder.com/60x60.png?text=QI"; // replace with your hosted logo if desired
   launch.appendChild(logo);
   document.body.appendChild(launch);
 
-  // 5) Chat window
+  // Chat window
   const box = document.createElement("div");
   box.className = "qi-box";
   box.innerHTML = `
@@ -70,7 +73,7 @@
   const input = box.querySelector("input");
   const sendBtn = box.querySelector("button");
 
-  function push(role, text) {
+  function push(role, text){
     const row = document.createElement("div");
     row.className = "qi-row " + (role === "user" ? "qi-user" : "qi-bot");
     const b = document.createElement("div");
@@ -81,7 +84,7 @@
     body.scrollTop = body.scrollHeight;
   }
 
-  function sampleQuickQuestions() {
+  function sampleQuickQuestions(){
     const all = [
       "How long do the Flavour Cores last?",
       "Does it feel like smoking a cigarette?",
@@ -104,13 +107,14 @@
       "What does “Sold Out” mean?",
       "When will a sold-out item be back?"
     ];
-    const shuffled = all.sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, 6);
+    const shuffled = all.sort(()=>Math.random()-0.5);
+    return shuffled.slice(0,6);
   }
 
   function renderChips() {
     chips.innerHTML = "";
-    sampleQuickQuestions().forEach((q) => {
+    const qs = sampleQuickQuestions();
+    qs.forEach(q => {
       const btn = document.createElement("button");
       btn.className = "qi-chip";
       btn.textContent = q;
@@ -119,39 +123,26 @@
     });
   }
 
-  // 6) Send to your Vercel API (POST /api/chat with {message})
-  async function ask(text) {
+  async function ask(text){
     push("user", text);
     chips.innerHTML = "";
-
-    try {
-      const r = await fetch(`${API_BASE}/api/chat`, {
+    try{
+      const r = await fetch((API_BASE || "") + "/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text })
+        body: JSON.stringify({ text })
       });
-
-      if (!r.ok) {
-        const errText = await r.text().catch(() => "");
-        console.error("API error", r.status, errText);
-        throw new Error(`API ${r.status}`);
-      }
-
-      const data = await r.json().catch(() => ({}));
-      console.log("API reply:", data);
-      const answer = data && data.reply
-        ? data.reply
-        : "I’m not 100% sure on that one! Could you email our team at support@quititaus.com.au so we can help you out?";
+      const data = await r.json();
+      const answer = data && data.answer ? data.answer :
+        "I’m not 100% sure on that one! Could you email our team at support@quititaus.com.au so we can help you out?";
       push("assistant", answer);
       renderChips();
-    } catch (e) {
-      console.error(e);
+    }catch(e){
       push("assistant", "Hmm, something went wrong. Please email support@quititaus.com.au and we’ll help right away.");
-      renderChips();
     }
   }
 
-  // 7) Events
+  // Events
   launch.onclick = () => {
     const visible = box.style.display === "block";
     box.style.display = visible ? "none" : "block";
@@ -160,19 +151,14 @@
       renderChips();
     }
   };
-
   sendBtn.onclick = () => {
     const t = input.value.trim();
     if (!t) return;
     input.value = "";
     ask(t);
   };
-
-  input.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      sendBtn.click();
-    }
+  input.addEventListener("keydown", (e)=>{
+    if (e.key === "Enter") { e.preventDefault(); sendBtn.click(); }
   });
-})();
 
+})();
