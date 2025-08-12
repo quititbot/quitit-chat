@@ -1,31 +1,35 @@
+
 (function () {
   console.log("✅ quitit-chat.js loaded");
 
-  // If we're on Shopify, use your fixed Vercel domain.
-  // Otherwise (e.g., Vercel preview), use same-origin so previews work.
-  const PROD_API = "https://quitit-chat.vercel.app"; // <— your Vercel domain (no trailing slash)
-  const isShopify = /myshopify\.com|shopify\.com/i.test(location.hostname);
-  const API_BASE = isShopify ? PROD_API : window.location.origin;
+  // --- API base detection (Shopify -> prod domain; Vercel preview -> same origin) ---
+  const PROD_API = "https://quitit-chat.vercel.app"; // no trailing slash
+  const isShopifyHost = /myshopify\.com|shopify\.com/i.test(location.hostname);
+  const API_BASE = isShopifyHost ? PROD_API : window.location.origin;
 
+  // --- Brand palette (used by your UI code) ---
   const BRAND = {
-  const API_BASE = "https://quitit-chat.vercel.app/"; // <-- your Vercel URL
-  // ...
-  async function ask(text){
-    const r = await fetch(${API_BASE}/api/chat, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: text })
-    });
-    // ...
-  }
-  {
     green: "#1C3A3B",
     orange: "#FF5B00",
     chipBg: "#EEFFBD",
     chipText: "#1C3A3B",
   };
-    chipText: "#1C3A3B"
+
+  // --- Minimal ask() helper (non-streaming; gets you back online fast) ---
+  async function ask(text) {
+    const res = await fetch(`${API_BASE}/api/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: text }),
+    });
+    if (!res.ok) throw new Error("Chat request failed");
+    return res.json(); // adjust if your API streams; this version expects a JSON body
+  }
+
+  // Expose small API for your page code
+  window.QI_CHAT = { ask, BRAND, API_BASE };
 })();
+
 
 
   const style = document.createElement("style");
