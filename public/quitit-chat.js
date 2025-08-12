@@ -1,9 +1,10 @@
 (function(){
-  // --- API base ---
-  // On Shopify (incl. quititaus.com.au), always call your Vercel API.
-  // Else (Vercel preview, local), use same-origin.
+  // --- API base: Shopify + quititaus.com.au -> Vercel API; otherwise same-origin ---
   const PROD_API = "https://quitit-chat.vercel.app"; // no trailing slash
-  const isShopifyHost = /(?:^|\.)myshopify\.com$|(?:^|\.)shopify\.com$|(?:^|\.)quititaus\.com\.au$/i.test(location.hostname);
+  const isShopifyHost =
+    location.hostname.includes("myshopify.com") ||
+    location.hostname.includes("shopify.com") ||
+    location.hostname.includes("quititaus.com.au");
   const API_BASE = isShopifyHost ? PROD_API : (window.location.origin || "");
 
   // --- Brand ---
@@ -45,7 +46,7 @@
   launch.setAttribute("aria-label","Open chat");
   const logo = document.createElement("img");
   logo.alt = "QUIT IT";
-  logo.src = "https://via.placeholder.com/60x60.png?text=QI"; // swap to your hosted logo if you want
+  logo.src = "https://via.placeholder.com/60x60.png?text=QI"; // swap to your logo if you want
   launch.appendChild(logo);
   document.body.appendChild(launch);
 
@@ -82,7 +83,7 @@
     row.appendChild(b);
     body.appendChild(row);
     body.scrollTop = body.scrollHeight;
-    return b; // return bubble so we can stream into it
+    return b;
   }
 
   function sampleQuickQuestions(){
@@ -109,17 +110,16 @@
     });
   }
 
-  // --- Chat (handles SSE and JSON) ---
+  // --- Chat (supports SSE and JSON) ---
   async function ask(text){
     push("user", text);
     chips.innerHTML = "";
-    const botBubble = push("assistant", "…"); // create early for streaming
+    const botBubble = push("assistant", "…");
 
     try{
       const res = await fetch(API_BASE + "/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        // send both keys so either backend contract works
         body: JSON.stringify({ message: text, text })
       });
 
@@ -132,7 +132,7 @@
 
       const ctype = (res.headers.get("content-type") || "").toLowerCase();
 
-      // --- SSE streaming path ---
+      // SSE streaming path
       if (ctype.includes("text/event-stream")) {
         const reader = res.body.getReader();
         const decoder = new TextDecoder();
@@ -145,7 +145,6 @@
 
           const lines = buffer.split("\n");
           buffer = lines.pop() || "";
-
           for (const line of lines) {
             const t = line.trim();
             if (!t.startsWith("data:")) continue;
@@ -159,14 +158,14 @@
                 botBubble.textContent = acc;
                 body.scrollTop = body.scrollHeight;
               }
-            } catch { /* ignore parse blips */ }
+            } catch {}
           }
         }
         renderChips();
         return;
       }
 
-      // --- JSON fallback ---
+      // JSON fallback
       const data = await res.json().catch(()=> ({}));
       const answer =
         data.answer ||
@@ -201,7 +200,7 @@
     if (e.key === "Enter") { e.preventDefault(); sendBtn.click(); }
   });
 
-  // Expose minimal debug handle if needed
+  // Debug handle (optional)
   window.QI_CHAT = { API_BASE, open: () => launch.click() };
 })();
 
