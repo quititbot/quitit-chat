@@ -1,0 +1,13 @@
+{
+  "name": "quitit-secure-chat",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev",
+    "start": "vercel dev"
+  },
+  "dependencies": {
+    "openai": "^4.57.0",
+    "resend": "^3.0.0"
+  }
+}
