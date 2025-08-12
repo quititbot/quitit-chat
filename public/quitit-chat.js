@@ -1,20 +1,13 @@
-(function () {
-  console.log("✅ quitit-chat.js loaded");
+(function(){
+  const API_BASE = ""; // same origin by default; if hosting elsewhere, set full URL
 
-  // --- API base detection (Shopify -> prod domain; Vercel preview -> same origin) ---
-  const PROD_API = "https://quitit-chat.vercel.app"; // no trailing slash
-  const isShopifyHost = /myshopify\.com|shopify\.com/i.test(location.hostname);
-  const API_BASE = isShopifyHost ? PROD_API : window.location.origin;
-
-  // --- Brand palette ---
   const BRAND = {
     green: "#1C3A3B",
     orange: "#FF5B00",
     chipBg: "#EEFFBD",
-    chipText: "#1C3A3B",
+    chipText: "#1C3A3B"
   };
 
-  // --- Styles (wrapped in backticks) ---
   const style = document.createElement("style");
   style.textContent = `
   .qi-launch{position:fixed;right:18px;bottom:18px;width:56px;height:56px;border-radius:50%;background:${BRAND.green};display:grid;place-items:center;z-index:999999;border:none;box-shadow:0 10px 25px rgba(0,0,0,.18);cursor:pointer;transition:transform .15s}
@@ -28,7 +21,7 @@
   .qi-row{display:flex;margin:6px 0}
   .qi-bot{justify-content:flex-start}
   .qi-user{justify-content:flex-end}
-  .qi-bubble{max-width:78%;padding:8px 10px;border-radius:14px;border:1px solid #e8e8e8;background:#fff;font:13px/1.45 system-ui;white-space:pre-wrap}
+  .qi-bubble{max-width:78%;padding:8px 10px;border-radius:14px;border:1px solid #e8e8e8;background:#fff;font:13px/1.45 system-ui}
   .qi-user .qi-bubble{background:${BRAND.orange};border-color:${BRAND.orange};color:#fff}
   .qi-foot{border-top:1px solid #eee;padding:8px;background:#fff}
   .qi-input{width:100%;display:flex;gap:8px}
@@ -39,17 +32,16 @@
   `;
   document.head.appendChild(style);
 
-  // Launcher
+  // Create launcher
   const launch = document.createElement("button");
   launch.className = "qi-launch";
-  launch.setAttribute("aria-label", "Open chat");
   const logo = document.createElement("img");
   logo.alt = "QUIT IT";
-  logo.src = "https://via.placeholder.com/60x60.png?text=QI"; // replace with your logo if desired
+  logo.src = "https://via.placeholder.com/60x60.png?text=QI"; // replace with your hosted logo if desired
   launch.appendChild(logo);
   document.body.appendChild(launch);
 
-  // Chat window (wrapped in backticks)
+  // Chat window
   const box = document.createElement("div");
   box.className = "qi-box";
   box.innerHTML = `
@@ -62,10 +54,9 @@
       <div class="qi-chips"></div>
       <div class="qi-input">
         <input placeholder="Type your message…" />
-        <button type="button">Send</button>
+        <button>Send</button>
       </div>
-    </div>
-  `;
+    </div>`;
   document.body.appendChild(box);
 
   const body = box.querySelector(".qi-body");
@@ -88,10 +79,24 @@
     const all = [
       "How long do the Flavour Cores last?",
       "Does it feel like smoking a cigarette?",
+      "Is it safe during pregnancy?",
       "How do I activate a core?",
       "Refunds & returns?",
       "Shipping times & tracking?",
-      "The flavour feels weak — is that normal?"
+      "Can you ship internationally?",
+      "Is the product FDA/TGA approved?",
+      "Can I buy in a physical store?",
+      "Do you have Afterpay?",
+      "How long is shipping?",
+      "What’s inside the cores?",
+      "The flavour feels weak — is that normal?",
+      "Is it safe to use?",
+      "Can I change my order address?",
+      "How should I adjust my device for stronger taste?",
+      "Why does my order route through another state?",
+      "How can I schedule a delivery?",
+      "What does “Sold Out” mean?",
+      "When will a sold-out item be back?"
     ];
     const shuffled = all.sort(()=>Math.random()-0.5);
     return shuffled.slice(0,6);
@@ -99,35 +104,31 @@
 
   function renderChips() {
     chips.innerHTML = "";
-    sampleQuickQuestions().forEach(q => {
+    const qs = sampleQuickQuestions();
+    qs.forEach(q => {
       const btn = document.createElement("button");
       btn.className = "qi-chip";
       btn.textContent = q;
-      btn.onclick = () => doAsk(q);
+      btn.onclick = () => ask(q);
       chips.appendChild(btn);
     });
   }
 
-  // Chat request (expects JSON response)
-  async function doAsk(text){
+  async function ask(text){
     push("user", text);
     chips.innerHTML = "";
     try{
-      const r = await fetch(`${API_BASE}/api/chat`, {
+      const r = await fetch((API_BASE || "") + "/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text }) // your API expects 'message'
+        body: JSON.stringify({ text })
       });
-      const data = await r.json().catch(()=> ({}));
-      const answer =
-        data.answer ||
-        data.message ||
-        data.choices?.[0]?.message?.content ||
-        "I’m not 100% sure on that one. Please email support@quititaus.com.au and we’ll help you out.";
+      const data = await r.json();
+      const answer = data && data.answer ? data.answer :
+        "I’m not 100% sure on that one! Could you email our team at support@quititaus.com.au so we can help you out?";
       push("assistant", answer);
       renderChips();
     }catch(e){
-      console.error(e);
       push("assistant", "Hmm, something went wrong. Please email support@quititaus.com.au and we’ll help right away.");
     }
   }
@@ -142,20 +143,13 @@
     }
   };
   sendBtn.onclick = () => {
-    const t = (input.value || "").trim();
+    const t = input.value.trim();
     if (!t) return;
     input.value = "";
-    doAsk(t);
+    ask(t);
   };
   input.addEventListener("keydown", (e)=>{
     if (e.key === "Enter") { e.preventDefault(); sendBtn.click(); }
   });
 
-  // Expose for quick debugging
-  window.QI_CHAT = { API_BASE, open: () => launch.click() };
-})();
-
-
-  // Expose small API for debugging
-  window.QI_CHAT = { API_BASE, BRAND, open: () => { launch.click(); } };
 })();
