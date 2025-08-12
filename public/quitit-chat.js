@@ -1,13 +1,31 @@
-(function(){
-  const API_BASE = ""; // same origin by default; if hosting elsewhere, set full URL
+(function () {
+  console.log("✅ quitit-chat.js loaded");
+
+  // If we're on Shopify, use your fixed Vercel domain.
+  // Otherwise (e.g., Vercel preview), use same-origin so previews work.
+  const PROD_API = "https://quitit-chat.vercel.app"; // <— your Vercel domain (no trailing slash)
+  const isShopify = /myshopify\.com|shopify\.com/i.test(location.hostname);
+  const API_BASE = isShopify ? PROD_API : window.location.origin;
 
   const BRAND = {
+  const API_BASE = "https://quitit-chat.vercel.app/"; // <-- your Vercel URL
+  // ...
+  async function ask(text){
+    const r = await fetch(${API_BASE}/api/chat, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: text })
+    });
+    // ...
+  }
+  {
     green: "#1C3A3B",
     orange: "#FF5B00",
     chipBg: "#EEFFBD",
-    chipText: "#1C3A3B"
+    chipText: "#1C3A3B",
   };
-
+    chipText: "#1C3A3B"
+})();
 
 
   const style = document.createElement("style");
