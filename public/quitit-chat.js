@@ -1,8 +1,10 @@
 (function(){
-  // --- API base (Shopify -> prod, elsewhere -> same-origin) ---
+  // --- API base ---
+  // On Shopify (incl. quititaus.com.au), always call your Vercel API.
+  // Else (Vercel preview, local), use same-origin.
   const PROD_API = "https://quitit-chat.vercel.app"; // no trailing slash
-  const isShopify = /myshopify\.com|shopify\.com/i.test(location.hostname);
-  const API_BASE = isShopify ? PROD_API : (window.location.origin || "");
+  const isShopifyHost = /(?:^|\.)myshopify\.com$|(?:^|\.)shopify\.com$|(?:^|\.)quititaus\.com\.au$/i.test(location.hostname);
+  const API_BASE = isShopifyHost ? PROD_API : (window.location.origin || "");
 
   // --- Brand ---
   const BRAND = {
@@ -40,9 +42,10 @@
   // --- Launcher ---
   const launch = document.createElement("button");
   launch.className = "qi-launch";
+  launch.setAttribute("aria-label","Open chat");
   const logo = document.createElement("img");
   logo.alt = "QUIT IT";
-  logo.src = "https://via.placeholder.com/60x60.png?text=QI"; // swap to your logo if you want
+  logo.src = "https://via.placeholder.com/60x60.png?text=QI"; // swap to your hosted logo if you want
   launch.appendChild(logo);
   document.body.appendChild(launch);
 
@@ -106,14 +109,14 @@
     });
   }
 
-  // --- Chat (SSE or JSON) ---
+  // --- Chat (handles SSE and JSON) ---
   async function ask(text){
     push("user", text);
     chips.innerHTML = "";
     const botBubble = push("assistant", "…"); // create early for streaming
 
     try{
-      const res = await fetch((API_BASE || "") + "/api/chat", {
+      const res = await fetch(API_BASE + "/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         // send both keys so either backend contract works
@@ -197,5 +200,8 @@
   input.addEventListener("keydown", (e)=>{
     if (e.key === "Enter") { e.preventDefault(); sendBtn.click(); }
   });
+
+  // Expose minimal debug handle if needed
+  window.QI_CHAT = { API_BASE, open: () => launch.click() };
 })();
 
