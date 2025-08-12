@@ -117,24 +117,31 @@
     });
   }
 
-  async function ask(text){
+   async function ask(text){
     push("user", text);
     chips.innerHTML = "";
     try{
       const r = await fetch((API_BASE || "") + "/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text })
+        body: JSON.stringify({ text, message: text })  // 2) send both
       });
-      const data = await r.json();
-      const answer = data && data.answer ? data.answer :
+
+      // 3) accept common response shapes
+      const data = await r.json().catch(()=> ({}));
+      const answer =
+        data.answer ||
+        data.message ||
+        data.choices?.[0]?.message?.content ||
         "I’m not 100% sure on that one! Could you email our team at support@quititaus.com.au so we can help you out?";
+
       push("assistant", answer);
       renderChips();
     }catch(e){
       push("assistant", "Hmm, something went wrong. Please email support@quititaus.com.au and we’ll help right away.");
     }
   }
+
 
   // Events
   launch.onclick = () => {
