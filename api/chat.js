@@ -99,7 +99,7 @@ const FAQ = [
   ],
   answer:
     "That’s expected — **no vapour, no smoke, no heat**. The flavour is **subtle by design**. Breathe in slowly through the tip and tweak the **airflow** by twisting the black tip. If you want more sensation, cover a **side hole** while inhaling. 🌿"
-}
+},
 
   // Speak to a person
   {
