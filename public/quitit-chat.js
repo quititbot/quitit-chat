@@ -198,7 +198,7 @@ const answer =
   data.answer ||
   data.message ||
   data.choices?.[0]?.message?.content ||
-  "I’m not 100% sure on that one! Could you email support@quititaus.com.au so we can help?";
+  "I’m sorry, I don’t know the answer to that. You can rephrase the question or alternatively, you can contact our team via the contact form on our FAQ page and they should be able to help you out 😊";
 botBubble.textContent = cleanBotText(answer);
 renderChips();
 
