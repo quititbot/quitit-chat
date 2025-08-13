@@ -62,12 +62,26 @@ const FAQ = [
 {
   id: "cant-taste-anything",
   tests: [
-    // “can’t taste / no taste / weak taste”
+   id: "cant-taste-anything",
+  tests: [
+    // Common direct statements
     /can('?t| not)\s*(taste|feel)\s*anything/i,
-    /(no|not getting)\s*(taste|flavou?r)/i,
-    /(taste|flavou?r)\s*(too\s*)?(weak|light|faint|subtle)/i,
-    /(no|not enough)\s*(flavou?r|taste|scent)/i,
+    /(no|not getting|zero|hardly|barely|can't really)\s*(taste|flavou?r)/i,
+    /(taste|flavou?r)\s*(too\s*)?(weak|light|faint|subtle|low)/i,
+    /(no|not enough|zero)\s*(flavou?r|taste|scent)/i,
+    /flavou?r\s*very\s*(weak|light|faint|subtle)/i,
+
+    // Typos & misspellings
+    /cant\s*tast\b/i, // missing 'e' in taste
+    /flavo?r\b/i,     // missing 'u' or typos in flavour
+    /flavou?r.*week/i, // 'week' instead of 'weak'
+
+    // Conversational variants
     /i.*barely.*(taste|flavou?r)/i,
+    /(no|zero)\s*flavou?r/i,
+    /hardly.*(taste|flavou?r)/i,
+    /(flavou?r|taste)\s*is\s*gone/i,
+    /(flavou?r|taste)\s*not\s*(strong|there|good)/i
 
     // “not strong / not hitting / no hit”
     /(not|no)\s*(hit|throat hit|kick)/i,
