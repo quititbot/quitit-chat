@@ -3,7 +3,13 @@
   window.__QI_WIDGET_LOADED__ = true;
 
   const API_BASE = "https://quitit-chat.vercel.app";
-  const BRAND = { green: "#1C3A3B", orange: "#FF5B00", chipBg: "#EEFFBD", chipText: "#1C3A3B" };
+ 
+  const BRAND = { 
+  green: "#90ee90", // light green so we can tell the difference
+  orange: "#FF5800", 
+  chipBg: "#EEFFBD", 
+  chipText: "#1C3A38" 
+};
 
   const style = document.createElement("style");
   style.textContent = `
