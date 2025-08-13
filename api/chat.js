@@ -1,7 +1,7 @@
-// /api/chat.js — Grounded answers from QUIT IT pages only (JSON + CORS)
+  // /api/chat.js — Grounded answers from your QUIT IT pages only (JSON + CORS, friendly tone + emojis)
 
 export default async function handler(req, res) {
-  // --- CORS (simple & permissive; tighten later if you like) ---
+  // --- CORS (simple & permissive; tighten origins later if you want) ---
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
@@ -15,9 +15,9 @@ export default async function handler(req, res) {
   const userQ = (body?.message ?? body?.text ?? "").trim();
   if (!userQ) return res.status(400).json({ error: "Missing message" });
 
-  // --- Friendly fallback (used whenever we can't find it in Sources) ---
+  // --- Friendly fallback (used when we can’t find it in your pages) ---
   const FRIENDLY_FALLBACK =
-    "I’m sorry—I don’t know the answer to that. You can contact our team at support@quititaus.com.au and they’ll be happy to help.";
+    "I’m sorry, I don’t know the answer to that. You can contact our team at support@quititaus.com.au and they should be able to help you out 😊";
 
   // --- Whitelisted QUIT IT pages (edit/expand anytime) ---
   // Includes your new URLs, plus common info pages.
@@ -34,17 +34,17 @@ export default async function handler(req, res) {
     { id: "starter-pack",      url: "https://quititaus.com.au/products/starter-pack" },
   ];
 
-  // --- Simple server memory cache (clears on redeploy) ---
+  // --- Tiny server-side cache (clears on each deploy) ---
   globalThis.__QI_CACHE__ ||= new Map();
   const cache = globalThis.__QI_CACHE__;
 
   async function fetchText(url) {
     if (cache.has(url)) return cache.get(url);
     const r = await fetch(url, { method: "GET" });
-    if (!r.ok) throw new Error(`Fetch failed ${r.status} for ${url}`);
+    if (!r.ok) throw new Error(`Fetch ${r.status} for ${url}`);
     const html = await r.text();
 
-    // strip scripts/styles, tags, entities; collapse whitespace
+    // Strip scripts/styles/tags, decode a couple entities, collapse spaces
     const withoutScripts = html.replace(/<script[\s\S]*?<\/script>/gi, " ");
     const withoutStyles  = withoutScripts.replace(/<style[\s\S]*?<\/style>/gi, " ");
     const text = withoutStyles
@@ -58,7 +58,7 @@ export default async function handler(req, res) {
     return text;
   }
 
-  // chunk text into ~900 chars with 120-char overlap (keeps context)
+  // Chunk text (~900 chars) with overlap to preserve context
   function chunkText(t, maxLen = 900, overlap = 120) {
     const chunks = [];
     let i = 0;
@@ -70,7 +70,7 @@ export default async function handler(req, res) {
     return chunks.filter(Boolean);
   }
 
-  // super-simple keyword score
+  // Very simple keyword scoring
   function scoreChunk(q, chunk) {
     const terms = q.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
     const lc = chunk.toLowerCase();
@@ -79,14 +79,14 @@ export default async function handler(req, res) {
     return score;
   }
 
-  // Build a ranked corpus of chunks from your pages
+  // Build a ranked corpus from your pages
   let corpus = [];
   try {
     const docs = await Promise.all(
       PAGES.map(p =>
         fetchText(p.url)
           .then(t => ({ id: p.id, url: p.url, text: t }))
-          .catch(() => null)
+          .catch(() => null) // ignore pages that fail to fetch
       )
     );
     for (const doc of docs.filter(Boolean)) {
@@ -98,7 +98,7 @@ export default async function handler(req, res) {
     return res.status(502).json({ ok: false, error: "Failed to fetch site content", detail: String(e) });
   }
 
-  // Take top-scoring chunks; if none > 0, we don’t answer
+  // Take top matches; if none relevant, use friendly fallback
   corpus.sort((a, b) => b.score - a.score);
   const TOP_K = 6;
   const top = corpus.slice(0, TOP_K).filter(c => c.score > 0);
@@ -107,18 +107,17 @@ export default async function handler(req, res) {
     return res.status(200).json({ answer: FRIENDLY_FALLBACK, grounded: false });
   }
 
-  // Build a Sources block for the model
   const sourcesBlock = top.map((c, i) => `Source ${i+1} [${c.id}]: ${c.chunk}`).join("\n\n");
 
-  // Gentle, friendly system prompt (no guessing)
+  // Friendly system prompt, emojis allowed, but *only* use sources
   const SYSTEM = `
-You are QUIT IT’s friendly assistant.
-Answer ONLY using the “Sources” provided. If the answer isn’t clearly supported, respond with: "${FRIENDLY_FALLBACK}"
-Be warm, helpful, and concise (around 2–5 short sentences). Avoid medical claims. Use plain language.
-If helpful, mention they can email support@quititaus.com.au.
+You are QUIT IT’s friendly assistant 😊.
+Answer ONLY using the “Sources” text below. If the answer isn’t clearly supported, reply with this exactly:
+"${FRIENDLY_FALLBACK}"
+Be warm, helpful, and concise (about 2–5 short sentences). Avoid medical claims. Use plain language and emojis sparingly.
 `;
 
-  // Call OpenAI (non-streaming for reliability)
+  // Call OpenAI (non-streaming for reliability with Shopify)
   try {
     const r = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -128,8 +127,8 @@ If helpful, mention they can email support@quititaus.com.au.
       },
       body: JSON.stringify({
         model: "gpt-4o-mini",
-        temperature: 0.3,      // calm & consistent
-        max_tokens: 260,       // enough for a friendly helpful reply
+        temperature: 0.3,      // friendly but consistent
+        max_tokens: 260,
         messages: [
           { role: "system", content: SYSTEM.trim() },
           { role: "user", content: `Question: ${userQ}\n\nSources:\n${sourcesBlock}` },
