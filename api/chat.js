@@ -59,6 +59,19 @@ const FAQ = [
     "Just pop in a core and breathe in **slowly** through the tip — no button, no heat, no vapour. Twist the **tip** to adjust airflow. Flavour is intentionally **subtle** and often builds over the first couple of days. Each core lasts about **5 days**. 🌿"
 },
 
+  {
+  id: "cant-taste-anything",
+  tests: [
+    /(can('?t| not)\s*(taste|tast|feel).*(anything|flavo?u?r|taste)/i,
+    /(no|zero|hardly|barely)\s*(taste|tast|flavo?u?r)/i,
+    /(i\s*)?(don('|’)t|cant|cannot)\s*(taste|tast|feel).*(anything|flavo?u?r)/i,
+    /flavo?u?r\s*(too|so|very)?\s*(weak|light|faint)/i,
+    /can('?t| not)\s*(really|hardly)\s*(taste|tast)/i,
+    /can('|’)t\s*taste/i
+  ],
+  answer: "Flavour in QUIT IT is designed to be **subtle** — it won’t hit like a vape. 🌿 It often builds over the first couple of days. Try **slower, deeper breaths**, twist the tip to **tighten airflow**, or cover a side hole for more intensity."
+},
+
 {
   id: "cant-taste-anything",
   tests: [
