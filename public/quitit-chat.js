@@ -3,21 +3,25 @@
   if (window.__QI_WIDGET_LOADED__) return;
   window.__QI_WIDGET_LOADED__ = true;
 
-  const WIDGET_BUILD = "fe-2025-08-13-06"; // bump when you redeploy
+  const WIDGET_BUILD = "fe-2025-08-13-07";
   console.log("QUIT IT widget build:", WIDGET_BUILD);
 
+  // API (prod)
   const API_BASE = "https://quitit-chat.vercel.app";
 
+  // Brand palette
   const BRAND = {
-    green: "#90EE90",          // light green button (easy to spot new build)
+    green: "#1C3A3B",   // dark green (borders, header)
     orange: "#FF5800",
     chipBg: "#EEFFBD",
-    chipText: "#1C3A3B"
+    chipText: "#1C3A3B",
+    iconBlue: "#007BFF" // launcher (chat icon) background
   };
 
+  // Styles
   const style = document.createElement("style");
   style.textContent = `
-  .qi-launch{position:fixed;right:18px;bottom:18px;width:56px;height:56px;border-radius:50%;background:${BRAND.green};display:grid;place-items:center;z-index:999999;border:none;box-shadow:0 10px 25px rgba(0,0,0,.18);cursor:pointer;transition:transform .15s}
+  .qi-launch{position:fixed;right:18px;bottom:18px;width:56px;height:56px;border-radius:50%;background:${BRAND.iconBlue};display:grid;place-items:center;z-index:999999;border:none;box-shadow:0 10px 25px rgba(0,0,0,.18);cursor:pointer;transition:transform .15s}
   .qi-launch:hover{transform:scale(1.06)}
   .qi-box{position:fixed;right:18px;bottom:84px;width:360px;max-width:92vw;background:#fff;border:1px solid ${BRAND.green};border-radius:18px;box-shadow:0 16px 50px rgba(0,0,0,.18);overflow:hidden;z-index:999998;display:none}
   .qi-head{display:flex;align-items:center;gap:10px;padding:10px 12px;background:${BRAND.green};color:#fff}
@@ -29,6 +33,8 @@
   .qi-user{justify-content:flex-end}
   .qi-bubble{max-width:78%;padding:8px 10px;border-radius:14px;border:1px solid #e8e8e8;background:#fff;font:13px/1.45 system-ui;white-space:pre-wrap;
     font-family: system-ui, "Apple Color Emoji", "Segoe UI Emoji", sans-serif;}
+  /* If you want bubbles to also use dark green borders, swap the line above to:
+     border:1px solid ${BRAND.green}; */
   .qi-user .qi-bubble{background:${BRAND.orange};border-color:${BRAND.orange};color:#fff}
   .qi-foot{border-top:1px solid #eee;padding:8px;background:#fff}
   .qi-input{width:100%;display:flex;gap:8px}
@@ -45,17 +51,17 @@
     return String(s).replace(/\*\*(.*?)\*\*/g, "$1").replace(/__([^_]+)__/g, "$1");
   }
 
-  // Launcher with high-contrast inline SVG icon
+  // Launcher with high-contrast white SVG on blue background
   const launch = document.createElement("button");
   launch.className = "qi-launch";
   launch.setAttribute("aria-label", "Open QUIT IT chat");
   launch.innerHTML = `
-    <svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">
       <path d="M4 6a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v6a4 4 0 0 1-4 4H10l-4 4v-4H8a4 4 0 0 1-4-4V6z"
-            fill="none" stroke="#1C3A3B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      <circle cx="9" cy="9" r="1.2" fill="#1C3A3B"/>
-      <circle cx="13" cy="9" r="1.2" fill="#1C3A3B"/>
-      <circle cx="17" cy="9" r="1.2" fill="#1C3A3B"/>
+            fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="9" cy="9" r="1.2" fill="#FFFFFF"/>
+      <circle cx="13" cy="9" r="1.2" fill="#FFFFFF"/>
+      <circle cx="17" cy="9" r="1.2" fill="#FFFFFF"/>
     </svg>
   `;
   document.body.appendChild(launch);
@@ -216,6 +222,6 @@
     if (e.key === "Enter") { e.preventDefault(); sendBtn.click(); }
   });
 
-  // for quick debugging
+  // quick debug hook
   window.QI_CHAT = { API_BASE, WIDGET_BUILD };
 })();
