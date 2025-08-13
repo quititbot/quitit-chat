@@ -24,7 +24,7 @@ export default async function handler(req, res) {
   if (!q) return res.status(400).json({ error: "Missing message", build: BUILD });
 
   // ---- Friendly fallback ----
-  const FALLBACK = "I’m sorry, I don’t know the answer to that. You can contact our team at support@quititaus.com.au and they should be able to help you out 😊";
+  const FALLBACK = "I’m sorry, I don’t know the answer to that. You can rephrase the question or alternatively, you can contact our team via the contact form on our FAQ page and they should be able to help you out 😊";
 
   // ---------------------------------------------------------------------------
   // 1) REGEX FAQ — Most specific first
