@@ -82,7 +82,7 @@ const FAQ = [
     /(does|should).*(it|this).*(hit|feel).*(like).*(a )?(vape|e-?cig|cigarette)/i
   ],
   answer: "QUIT IT is designed to be **gentle** — not like a vape. You’re breathing mostly air that’s naturally flavoured as it passes through the core. Try **slower, deeper breaths**, adjust the **airflow** (twist the black tip), or briefly **cover a side hole** for a stronger feel. Many people notice flavour more after **day 2–3**. If it still feels off, we’re happy to help at **support@quititaus.com.au** 😊"
-}
+},
 
 
 {
