@@ -1,18 +1,14 @@
 (function () {
-  // prevent double-injection
   if (window.__QI_WIDGET_LOADED__) return;
   window.__QI_WIDGET_LOADED__ = true;
 
-  // HARD-SET API to prod
   const API_BASE = "https://quitit-chat.vercel.app";
-
-  const BRAND = { green:"#1C3A3B", orange:"#FF5B00", chipBg:"#EEFFBD", chipText:"#1C3A3B" };
+  const BRAND = { green: "#1C3A3B", orange: "#FF5B00", chipBg: "#EEFFBD", chipText: "#1C3A3B" };
 
   const style = document.createElement("style");
   style.textContent = `
   .qi-launch{position:fixed;right:18px;bottom:18px;width:56px;height:56px;border-radius:50%;background:${BRAND.green};display:grid;place-items:center;z-index:999999;border:none;box-shadow:0 10px 25px rgba(0,0,0,.18);cursor:pointer;transition:transform .15s}
   .qi-launch:hover{transform:scale(1.06)}
-  .qi-launch img{width:30px;height:30px;border-radius:50%}
   .qi-box{position:fixed;right:18px;bottom:84px;width:360px;max-width:92vw;background:#fff;border:1px solid ${BRAND.green};border-radius:18px;box-shadow:0 16px 50px rgba(0,0,0,.18);overflow:hidden;z-index:999998;display:none}
   .qi-head{display:flex;align-items:center;gap:10px;padding:10px 12px;background:${BRAND.green};color:#fff}
   .qi-head .qi-title{font:600 14px/1.2 system-ui}
@@ -33,13 +29,25 @@
   `;
   document.head.appendChild(style);
 
-  // Launcher
+  // Markdown cleaner
+  function cleanBotText(s = "") {
+    return String(s)
+      .replace(/\*\*(.*?)\*\*/g, "$1")
+      .replace(/__([^_]+)__/g, "$1");
+  }
+
+  // Launcher with inline SVG
   const launch = document.createElement("button");
   launch.className = "qi-launch";
-  const logo = document.createElement("img");
-  logo.alt = "QUIT IT";
-  logo.src = "https://via.placeholder.com/60x60.png?text=QI"; // replace with your hosted logo if needed
-  launch.appendChild(logo);
+  launch.innerHTML = `
+    <svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true">
+      <path d="M4 6a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v6a4 4 0 0 1-4 4H10l-4 4v-4H8a4 4 0 0 1-4-4V6z" 
+            fill="none" stroke="${BRAND.chipBg}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="9" cy="9" r="1.2" fill="${BRAND.chipBg}"/>
+      <circle cx="13" cy="9" r="1.2" fill="${BRAND.chipBg}"/>
+      <circle cx="17" cy="9" r="1.2" fill="${BRAND.chipBg}"/>
+    </svg>
+  `;
   document.body.appendChild(launch);
 
   // Chat window
@@ -70,39 +78,29 @@
     row.className = "qi-row " + (role === "user" ? "qi-user" : "qi-bot");
     const b = document.createElement("div");
     b.className = "qi-bubble";
-    b.textContent = text || "";
+    b.textContent = cleanBotText(text || "");
     row.appendChild(b);
     body.appendChild(row);
     body.scrollTop = body.scrollHeight;
     return b;
   }
 
-// Pin 3 most helpful, randomize 3 more
-function sampleQuickQuestions() {
-  const pinned = [
-    "Which flavour should I pick?",
-    "How do I track my order?",
-  ];
-  const pool = [
-    "How long does shipping take?",
-    "Do you have Afterpay?",
-    "How long do the cores last?",
-    "Is QUIT IT safe to use?",
-    "Refunds & returns?",
-    "Does it feel like a cigarette?",
-    "Do you offer Express Post?",
-    "Do you ship internationally?",
-    "What’s inside the flavour cores?",
-  ];
-  const random3 = pool.sort(() => Math.random() - 0.5).slice(0, 3);
-  return [...pinned, ...random3];
-}
-
-  const random3 = pool.sort(() => Math.random() - 0.5).slice(0, 3);
-  return [...pinned, ...random3];
-}
-
-    return all.sort(() => Math.random() - 0.5).slice(0, 6);
+  // Quick question chips
+  function sampleQuickQuestions() {
+    const pinned = ["Which flavour should I pick?", "How do I track my order?"];
+    const pool = [
+      "How long does shipping take?",
+      "Do you have Afterpay?",
+      "How long do the cores last?",
+      "Is QUIT IT safe to use?",
+      "Refunds & returns?",
+      "Does it feel like a cigarette?",
+      "Do you offer Express Post?",
+      "Do you ship internationally?",
+      "What’s inside the flavour cores?"
+    ];
+    const random3 = pool.sort(() => Math.random() - 0.5).slice(0, 3);
+    return [...pinned, ...random3];
   }
 
   function renderChips() {
@@ -116,7 +114,6 @@ function sampleQuickQuestions() {
     });
   }
 
-  // Handles JSON or SSE responses
   let pending = false;
   async function ask(text) {
     if (pending) return;
@@ -131,7 +128,7 @@ function sampleQuickQuestions() {
       const res = await fetch(API_BASE + "/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text, text })
+        body: JSON.stringify({ message: text })
       });
 
       if (!res.ok) {
@@ -142,7 +139,6 @@ function sampleQuickQuestions() {
       }
 
       const ctype = (res.headers.get("content-type") || "").toLowerCase();
-
       if (ctype.includes("text/event-stream")) {
         const reader = res.body.getReader();
         const dec = new TextDecoder();
@@ -163,7 +159,7 @@ function sampleQuickQuestions() {
               const delta = json.choices?.[0]?.delta?.content || "";
               if (delta) {
                 acc += delta;
-                botBubble.textContent = acc;
+                botBubble.textContent = cleanBotText(acc);
                 body.scrollTop = body.scrollHeight;
               }
             } catch {}
@@ -179,7 +175,7 @@ function sampleQuickQuestions() {
         data.message ||
         data.choices?.[0]?.message?.content ||
         "I’m not 100% sure on that one! Could you email support@quititaus.com.au so we can help?";
-      botBubble.textContent = answer;
+      botBubble.textContent = cleanBotText(answer);
       renderChips();
     } catch (e) {
       console.error(e);
@@ -204,11 +200,12 @@ function sampleQuickQuestions() {
     input.value = "";
     ask(t);
   };
-  input.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") { e.preventDefault(); sendBtn.click(); }
+  input.addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      sendBtn.click();
+    }
   });
 
-  // optional debug
   window.QI_CHAT = { API_BASE };
 })();
-
