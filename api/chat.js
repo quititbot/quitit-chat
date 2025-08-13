@@ -160,7 +160,7 @@ const FAQ = [
   { id: "product-missing", tests: [/(missing|shortage)/i],
     answer: "That’s not right — please email **support@quititaus.com.au** within **48 hours** of delivery and we’ll fix it." },
   { id: "dont-like-it", tests: [/i don.?t like/i, /not happy|unhappy/i],
-    answer: "Sorry to hear that! If it’s flavour-related, many customers find it grows on them after a few days. You can also try our tips for stronger taste — or email us at **support@quititaus.com.au** to chat options." },
+    answer: "Sorry to hear that! If it’s flavour-related, many customers find flavours become more noticable after a few days. My recommendation is give it a real go! You may be suprised." },
 
   // Product & usage
   { id: "how-long-cores-last", tests: [/how long.*(flavou?r).*core/i, /(cores?).*(last)/i],
