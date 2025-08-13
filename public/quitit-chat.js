@@ -66,14 +66,31 @@
     return b;
   }
 
-  function sampleQuickQuestions(){
-    const all=[
-      "How long do the Flavour Cores last?","Does it feel like smoking a cigarette?",
-      "How do I activate a core?","Refunds & returns?","Shipping times & tracking?",
-      "The flavour feels weak — is that normal?"
-    ];
-    return all.sort(()=>Math.random()-0.5).slice(0,6);
-  }
+function sampleQuickQuestions() {
+  const all = [
+    "When will this be back in stock?",
+    "What does 'sold out' mean?",
+    "Can I schedule a delivery?",
+    "Why is my package routed to another state?",
+    "How can I make the flavour stronger?",
+    "Can I change my address after ordering?",
+    "Do you have a guarantee?",
+    "Can I buy this in-store?",
+    "Is it FDA or TGA approved?",
+    "Do you ship internationally?",
+    "Do you have Afterpay?",
+    "How long does shipping take?",
+    "What's your refund policy?",
+    "What's inside the flavour cores?",
+    "Why is the flavour weak?",
+    "Do I need to activate a core?",
+    "Is it safe to use while pregnant?",
+    "Is QUIT IT safe to use?",
+    "Does it feel like a cigarette?",
+    "How long do the cores last?"
+  ];
+  return all.sort(() => Math.random() - 0.5).slice(0, 6);
+}
 
   function renderChips(){
     chips.innerHTML="";
