@@ -3,7 +3,7 @@
   if (window.__QI_WIDGET_LOADED__) return;
   window.__QI_WIDGET_LOADED__ = true;
 
-  const WIDGET_BUILD = "fe-2025-08-13-07";
+  const WIDGET_BUILD = "fe-2025-08-13-09"; // bump for cache-bust
   console.log("QUIT IT widget build:", WIDGET_BUILD);
 
   // API (prod)
@@ -17,6 +17,28 @@
     chipText: "#1C3A3B",
     iconBlue: "#007BFF" // launcher (chat icon) background
   };
+
+  // ---------- minimal unanswered logger (added back) ----------
+  const __qiLogged = new Set();
+  function logUnanswered(question) {
+    try {
+      const key = (question || "").toLowerCase().trim();
+      if (!key || __qiLogged.has(key)) return;
+      __qiLogged.add(key);
+      fetch(API_BASE + "/api/log-unanswered", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          question,
+          client: {
+            href: location.href,
+            path: location.pathname,
+            tz: Intl.DateTimeFormat().resolvedOptions().timeZone
+          }
+        })
+      }).catch(() => {});
+    } catch {}
+  }
 
   // Styles
   const style = document.createElement("style");
@@ -33,8 +55,6 @@
   .qi-user{justify-content:flex-end}
   .qi-bubble{max-width:78%;padding:8px 10px;border-radius:14px;border:1px solid #e8e8e8;background:#fff;font:13px/1.45 system-ui;white-space:pre-wrap;
     font-family: system-ui, "Apple Color Emoji", "Segoe UI Emoji", sans-serif;}
-  /* If you want bubbles to also use dark green borders, swap the line above to:
-     border:1px solid ${BRAND.green}; */
   .qi-user .qi-bubble{background:${BRAND.orange};border-color:${BRAND.orange};color:#fff}
   .qi-foot{border-top:1px solid #eee;padding:8px;background:#fff}
   .qi-input{width:100%;display:flex;gap:8px}
@@ -46,12 +66,12 @@
   `;
   document.head.appendChild(style);
 
-  // Markdown cleaner (strip **bold** / __bold__)
+  // Markdown cleaner
   function cleanBotText(s = "") {
     return String(s).replace(/\*\*(.*?)\*\*/g, "$1").replace(/__([^_]+)__/g, "$1");
   }
 
-  // Launcher with high-contrast white SVG on blue background
+  // Launcher
   const launch = document.createElement("button");
   launch.className = "qi-launch";
   launch.setAttribute("aria-label", "Open QUIT IT chat");
@@ -156,7 +176,7 @@
 
       const ctype = (res.headers.get("content-type") || "").toLowerCase();
       if (ctype.includes("text/event-stream")) {
-        // (Kept for compatibility; your API currently returns JSON)
+        // kept for compatibility
         const reader = res.body.getReader();
         const dec = new TextDecoder();
         let buf = "", acc = "";
@@ -186,22 +206,21 @@
         return;
       }
 
-const data = await res.json().catch(() => ({}));
-if (data?.build) console.log("API build:", data.build);
+      const data = await res.json().catch(() => ({}));
+      if (data?.build) console.log("API build:", data.build);
 
-// If backend says it wasn't grounded (i.e., returned fallback), log it
-if (data && data.grounded === false) {
-  logUnanswered(text);
-}
+      // Log misses (guarded)
+      if (data && data.grounded === false) {
+        try { logUnanswered(text); } catch {}
+      }
 
-const answer =
-  data.answer ||
-  data.message ||
-  data.choices?.[0]?.message?.content ||
-  "I’m sorry, I don’t know the answer to that. You can rephrase the question or alternatively, you can contact our team via the contact form on our FAQ page and they should be able to help you out 😊";
-botBubble.textContent = cleanBotText(answer);
-renderChips();
-
+      const answer =
+        data.answer ||
+        data.message ||
+        data.choices?.[0]?.message?.content ||
+        "I’m sorry, I don’t know the answer to that. You can rephrase the question or alternatively, you can contact our team via the contact form on our FAQ page and they should be able to help you out 😊";
+      botBubble.textContent = cleanBotText(answer);
+      renderChips();
     } catch (e) {
       console.error(e);
       botBubble.textContent = "Network error reaching the chat service.";
