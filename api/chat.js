@@ -62,26 +62,42 @@ const FAQ = [
 {
   id: "cant-taste-anything",
   tests: [
-    /can(?:'?t| not)\s*(?:taste|feel)\s*anything/i,
-    /(no|not getting|zero|hardly|barely|can(?:'?t)?\s*really)\s*(taste|flavou?r)/i,
-    /(taste|flavou?r)\s*(?:too\s*)?(weak|light|faint|subtle|low)/i,
-    /(no|not enough|zero)\s*(flavou?r|taste|scent)/i,
-    /flavou?r\s*very\s*(weak|light|faint|subtle)/i,
-    /cant\s*tast\b/i,
-    /\bflavo?r\b/i,
-    /flavou?r.*\bweek\b/i,
-    /i.*barely.*(taste|flavou?r)/i,
-    /\b(no|zero)\s*flavou?r\b/i,
-    /hardly.*(taste|flavou?r)/i,
-    /(flavou?r|taste)\s*is\s*gone/i,
-    /(flavou?r|taste)\s*not\s*(strong|there|good)/i,
-    /(not|no)\s*(hit|throat hit|kick)/i,
-    /(not|no)\s*(strong|strength)/i,
-    /(is|it(?:'?s)?)\s*(working|work)/i,
-    /(nothing|no)\s*(coming out|happening)/i,
-    /(does|should).*(it|this).*(hit|feel).*(like).*(a )?(vape|e-?cig|cigarette)/i
+    // Core: can't / cannot / not tasting flavour
+    /\bcan(?:'?t| not)\s+(?:taste|flavou?r)\b/i,
+    /\bcan(?:'?t| not)\s+\w*\s*(?:taste|flavou?r)\b/i, // catches "can't taste any flavour"
+
+    // No / not getting flavour
+    /\b(?:no|not(?: getting)?|zero|hardly|barely|can't really)\b.*\b(?:taste|flavou?r)\b/i,
+
+    // Taste / flavour weak
+    /\b(?:taste|flavou?r)\b.*\b(?:weak|light|faint|subtle|low|gone)\b/i,
+
+    // Not enough flavour
+    /\b(?:no|not enough|zero)\b.*\b(?:flavou?r|taste|scent)\b/i,
+
+    // Typos & common mistakes
+    /\bcant\s*tast\b/i,            // missing 'e'
+    /\bflavo?r\b/i,                // flavour/flavor short typo
+    /\bflavou?r.*week\b/i,         // week instead of weak
+
+    // Conversational
+    /\bi.*barely.*(?:taste|flavou?r)\b/i,
+    /\bhardly.*(?:taste|flavou?r)\b/i,
+    /\b(flavour|taste)\s*not\s*(strong|there|good)\b/i,
+
+    // Not strong / not hitting / no hit
+    /\b(not|no)\s*(hit|throat hit|kick)\b/i,
+    /\b(not|no)\s*(strong|strength)\b/i,
+
+    // “is it working? nothing’s happening”
+    /\b(is|it'?s)\s*(working|work)\b/i,
+    /\b(nothing|no)\s*(coming out|happening)\b/i,
+
+    // Like a vape
+    /\b(does|should).*(it|this).*(hit|feel).*(like).*(a )?(vape|e-?cig|cigarette)\b/i
   ],
-  answer: "QUIT IT is designed to be **gentle** — not like a vape. You’re breathing mostly air that’s naturally flavoured as it passes through the core. Try **slower, deeper breaths**, adjust the **airflow** (twist the black tip), or briefly **cover a side hole** for a stronger feel. Many people notice flavour more after **day 2–3**. If it still feels off, we’re happy to help at **support@quititaus.com.au** 😊"
+  answer:
+    "QUIT IT is designed to be **gentle** — not like a vape. You’re breathing mostly air that’s naturally flavoured as it passes through the core. Try **slower, deeper breaths**, adjust the **airflow** (twist the black tip), or briefly **cover a side hole** for a stronger feel. Many people notice flavour more after **day 2–3**. If it still feels off, we’re happy to help at **support@quititaus.com.au** 😊"
 },
 
 
