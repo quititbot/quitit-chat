@@ -186,15 +186,22 @@
         return;
       }
 
-      const data = await res.json().catch(() => ({}));
-      if (data?.build) console.log("API build:", data.build);
-      const answer =
-        data.answer ||
-        data.message ||
-        data.choices?.[0]?.message?.content ||
-        "I’m not 100% sure on that one! Could you email support@quititaus.com.au so we can help?";
-      botBubble.textContent = cleanBotText(answer);
-      renderChips();
+const data = await res.json().catch(() => ({}));
+if (data?.build) console.log("API build:", data.build);
+
+// If backend says it wasn't grounded (i.e., returned fallback), log it
+if (data && data.grounded === false) {
+  logUnanswered(text);
+}
+
+const answer =
+  data.answer ||
+  data.message ||
+  data.choices?.[0]?.message?.content ||
+  "I’m not 100% sure on that one! Could you email support@quititaus.com.au so we can help?";
+botBubble.textContent = cleanBotText(answer);
+renderChips();
+
     } catch (e) {
       console.error(e);
       botBubble.textContent = "Network error reaching the chat service.";
