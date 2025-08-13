@@ -77,16 +77,31 @@
     return b;
   }
 
-  // Updated quick questions (your list)
-  function sampleQuickQuestions() {
-    const all = [
-      "Do you have Afterpay?",
-      "How long does shipping take?",
-      "What's inside the flavour cores?",
-      "Is QUIT IT safe to use?",
-      "Does it feel like a cigarette?",
-      "How long do the cores last?"
-    ];
+// Quick Questions: pin the top 3, randomize 3 more
+function sampleQuickQuestions() {
+  const pinned = [
+    "How long does shipping take?",
+    "Do you have Afterpay?",
+    "Which flavour should I pick?",
+  ];
+
+  const pool = [
+    "How do I track my order?",
+    "How long do the cores last?",
+    "Is QUIT IT safe to use?",
+    "Is it safe while pregnant?",
+    "Can I change my address after ordering?",
+    "Refunds & returns?",
+    "Does it feel like a cigarette?",
+    "Do you offer Express Post?",
+    "Do you ship internationally?",
+    "Speak to a person",
+  ];
+
+  const random3 = pool.sort(() => Math.random() - 0.5).slice(0, 3);
+  return [...pinned, ...random3];
+}
+
     return all.sort(() => Math.random() - 0.5).slice(0, 6);
   }
 
