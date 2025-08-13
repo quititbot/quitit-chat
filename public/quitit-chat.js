@@ -1,15 +1,19 @@
 (function () {
+  // prevent double-injection
   if (window.__QI_WIDGET_LOADED__) return;
   window.__QI_WIDGET_LOADED__ = true;
 
+  const WIDGET_BUILD = "fe-2025-08-13-06"; // bump when you redeploy
+  console.log("QUIT IT widget build:", WIDGET_BUILD);
+
   const API_BASE = "https://quitit-chat.vercel.app";
- 
-  const BRAND = { 
-  green: "#90ee90", // light green so we can tell the difference
-  orange: "#FF5800", 
-  chipBg: "#EEFFBD", 
-  chipText: "#1C3A38" 
-};
+
+  const BRAND = {
+    green: "#90EE90",          // light green button (easy to spot new build)
+    orange: "#FF5800",
+    chipBg: "#EEFFBD",
+    chipText: "#1C3A3B"
+  };
 
   const style = document.createElement("style");
   style.textContent = `
@@ -23,7 +27,8 @@
   .qi-row{display:flex;margin:6px 0}
   .qi-bot{justify-content:flex-start}
   .qi-user{justify-content:flex-end}
-  .qi-bubble{max-width:78%;padding:8px 10px;border-radius:14px;border:1px solid #e8e8e8;background:#fff;font:13px/1.45 system-ui;white-space:pre-wrap}
+  .qi-bubble{max-width:78%;padding:8px 10px;border-radius:14px;border:1px solid #e8e8e8;background:#fff;font:13px/1.45 system-ui;white-space:pre-wrap;
+    font-family: system-ui, "Apple Color Emoji", "Segoe UI Emoji", sans-serif;}
   .qi-user .qi-bubble{background:${BRAND.orange};border-color:${BRAND.orange};color:#fff}
   .qi-foot{border-top:1px solid #eee;padding:8px;background:#fff}
   .qi-input{width:100%;display:flex;gap:8px}
@@ -35,23 +40,22 @@
   `;
   document.head.appendChild(style);
 
-  // Markdown cleaner
+  // Markdown cleaner (strip **bold** / __bold__)
   function cleanBotText(s = "") {
-    return String(s)
-      .replace(/\*\*(.*?)\*\*/g, "$1")
-      .replace(/__([^_]+)__/g, "$1");
+    return String(s).replace(/\*\*(.*?)\*\*/g, "$1").replace(/__([^_]+)__/g, "$1");
   }
 
-  // Launcher with inline SVG
+  // Launcher with high-contrast inline SVG icon
   const launch = document.createElement("button");
   launch.className = "qi-launch";
+  launch.setAttribute("aria-label", "Open QUIT IT chat");
   launch.innerHTML = `
     <svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true">
-      <path d="M4 6a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v6a4 4 0 0 1-4 4H10l-4 4v-4H8a4 4 0 0 1-4-4V6z" 
-            fill="none" stroke="${BRAND.chipBg}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      <circle cx="9" cy="9" r="1.2" fill="${BRAND.chipBg}"/>
-      <circle cx="13" cy="9" r="1.2" fill="${BRAND.chipBg}"/>
-      <circle cx="17" cy="9" r="1.2" fill="${BRAND.chipBg}"/>
+      <path d="M4 6a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v6a4 4 0 0 1-4 4H10l-4 4v-4H8a4 4 0 0 1-4-4V6z"
+            fill="none" stroke="#1C3A3B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="9" cy="9" r="1.2" fill="#1C3A3B"/>
+      <circle cx="13" cy="9" r="1.2" fill="#1C3A3B"/>
+      <circle cx="17" cy="9" r="1.2" fill="#1C3A3B"/>
     </svg>
   `;
   document.body.appendChild(launch);
@@ -91,7 +95,7 @@
     return b;
   }
 
-  // Quick question chips
+  // Chips (2 pinned + 3 random)
   function sampleQuickQuestions() {
     const pinned = ["Which flavour should I pick?", "How do I track my order?"];
     const pool = [
@@ -146,6 +150,7 @@
 
       const ctype = (res.headers.get("content-type") || "").toLowerCase();
       if (ctype.includes("text/event-stream")) {
+        // (Kept for compatibility; your API currently returns JSON)
         const reader = res.body.getReader();
         const dec = new TextDecoder();
         let buf = "", acc = "";
@@ -176,6 +181,7 @@
       }
 
       const data = await res.json().catch(() => ({}));
+      if (data?.build) console.log("API build:", data.build);
       const answer =
         data.answer ||
         data.message ||
@@ -207,11 +213,9 @@
     ask(t);
   };
   input.addEventListener("keydown", e => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      sendBtn.click();
-    }
+    if (e.key === "Enter") { e.preventDefault(); sendBtn.click(); }
   });
 
-  window.QI_CHAT = { API_BASE };
+  // for quick debugging
+  window.QI_CHAT = { API_BASE, WIDGET_BUILD };
 })();
