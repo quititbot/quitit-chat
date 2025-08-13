@@ -197,229 +197,174 @@ const FAQ = [
     answer: "Customer favourites are **Crisp Mint, Maple Pepper, Blueberry, and Coffee**. 🌿 These give you a mix of refreshing, sweet, bold, and unique flavours — perfect for your Starter Pack’s 4 slots so you can see which you like best." },
 
   // === UPDATE SECTION – August 2025 ===
-[
   {
     id: "doesnt-work",
     tests: [
       /(it|this).*(doesn'?t|does not|won'?t)\s*work/i,
       /(not|isn'?t)\s*(working|operating|doing anything)/i
     ],
-    answer: "QUIT IT isn’t like a vape — there’s no smoke, vapour, or button. You breathe mostly air that’s naturally flavoured as it passes through the core. Try slower, deeper breaths, adjust the airflow (twist the tip), or briefly cover a side hole for more sensation."
+    answer:
+      "QUIT IT isn’t like a vape — there’s no smoke, vapour, or button. You breathe mostly air that’s naturally flavoured as it passes through the core. Try slower, deeper breaths, adjust the airflow (twist the tip), or briefly cover a side hole for more sensation."
   },
   {
     id: "addicted",
-    tests: [
-      /get\s*addicted/i,
-      /will\s*i\s*(be|become|get)\s*addicted/i
-    ],
-    answer: "No — QUIT IT contains no nicotine, tobacco, or addictive chemicals. It’s designed to help replace the habit, not create a new one."
+    tests: [/get\s*addicted/i, /will\s*i\s*(be|become|get)\s*addicted/i],
+    answer:
+      "No — QUIT IT contains no nicotine, tobacco, or addictive chemicals. It’s designed to help replace the habit, not create a new one."
   },
   {
     id: "nicotine",
-    tests: [
-      /has?\s*nicotine/i,
-      /contain.*nicotine/i
-    ],
+    tests: [/has?\s*nicotine/i, /contain.*nicotine/i],
     answer: "No — our products are 100% nicotine-free and tobacco-free."
   },
   {
     id: "is-vape",
-    tests: [
-      /(is|are|same as).*vape/i,
-      /(is|are).*(vape|ecig|cigarette)/i
-    ],
-    answer: "No — there’s no nicotine, no heating element, no vapour, and no clouds. It’s simply flavoured air you inhale, so it’s much gentler than vaping or smoking."
+    tests: [/(is|are|same as).*vape/i, /(is|are).*(vape|ecig|cigarette)/i],
+    answer:
+      "No — there’s no nicotine, no heating element, no vapour, and no clouds. It’s simply flavoured air you inhale, so it’s much gentler than vaping or smoking."
   },
   {
     id: "quit-smoking",
-    tests: [
-      /(help|use).*quit\s*(smoking|vaping)/i,
-      /stop\s*(smoking|vaping)/i
-    ],
-    answer: "QUIT IT is designed as a tool to replace the hand-to-mouth habit and provide a sensory experience without nicotine or tobacco. QUIT IT has helped thousands of customers all over Australia quit for good."
+    tests: [/(help|use).*quit\s*(smoking|vaping)/i, /stop\s*(smoking|vaping)/i],
+    answer:
+      "QUIT IT is designed as a tool to replace the hand-to-mouth habit and provide a sensory experience without nicotine or tobacco. QUIT IT has helped thousands of customers all over Australia quit for good."
   },
   {
     id: "use-at-work",
-    tests: [
-      /use.*at\s*work/i,
-      /can\s*i\s*.*work/i
-    ],
+    tests: [/use.*at\s*work/i, /can\s*i\s*.*work/i],
     answer: "Yes — since there’s no smoke, vapour, or smell, you can use it anywhere."
   },
   {
     id: "use-on-flight",
-    tests: [
-      /use.*(plane|flight|airplane|aeroplane)/i,
-      /take.*(plane|flight|airplane|aeroplane)/i
-    ],
+    tests: [/use.*(plane|flight|airplane|aeroplane)/i, /take.*(plane|flight|airplane|aeroplane)/i],
     answer: "Yes — since there’s no smoke, vapour, or smell, you can use it anywhere."
   },
   {
     id: "ship-tasmania",
-    tests: [
-      /ship.*tasmania/i,
-      /deliver.*tasmania/i
-    ],
+    tests: [/ship.*tasmania/i, /deliver.*tasmania/i],
     answer: "Yes — we ship anywhere in Australia, including Tasmania."
   },
   {
     id: "lost-product",
-    tests: [
-      /(lost|misplaced).*(quit\s*it|inhaler)/i
-    ],
-    answer: "We don’t replace lost products, but you can order a new inhaler through our website."
+    tests: [/(lost|misplaced).*(quit\s*it|inhaler)/i],
+    answer:
+      "We don’t replace lost products, but you can order a new inhaler through our website."
   },
   {
     id: "calories",
-    tests: [
-      /how.*calories/i,
-      /(any|has|contain).*calories/i
-    ],
-    answer: "None — they’re just flavoured air. There’s no sugar, no artificial sweeteners, and no nutritional impact."
+    tests: [/how.*calories/i, /(any|has|contain).*calories/i],
+    answer:
+      "None — they’re just flavoured air. There’s no sugar, no artificial sweeteners, and no nutritional impact."
   },
   {
     id: "weight-loss",
-    tests: [
-      /use.*(weight|diet|lose\s*weight)/i
-    ],
-    answer: "QUIT IT isn’t a weight-loss product, but some people find that using it can help manage cravings by keeping their mouth and hands busy."
+    tests: [/use.*(weight|diet|lose\s*weight)/i],
+    answer:
+      "QUIT IT isn’t a weight-loss product, but some people find that using it can help manage cravings by keeping their mouth and hands busy."
   },
   {
     id: "courier-or-auspost",
-    tests: [
-      /courier/i,
-      /auspost/i
-    ],
+    tests: [/courier/i, /auspost/i],
     answer: "We use Australia Post for all deliveries so you can track your parcel easily."
   },
   {
     id: "order-late",
-    tests: [
-      /(order|parcel).*(late|missing|didn'?t\s*come|hasn'?t\s*arrived)/i
-    ],
-    answer: "Sorry for the delay! Please email support@quititaus.com.au with your order number and we’ll track it for you right away."
+    tests: [/(order|parcel).*(late|missing|didn'?t\s*come|hasn'?t\s*arrived)/i],
+    answer:
+      "Sorry for the delay! Please email support@quititaus.com.au with your order number and we’ll track it for you right away."
   },
   {
     id: "same-as-fum",
-    tests: [
-      /(same|like).*f[üu]m/i
-    ],
-    answer: "No — while our inhalers look similar, we’re an Australian-based company with our own unique flavours and designs."
+    tests: [/(same|like).*f[üu]m/i],
+    answer:
+      "No — while our inhalers look similar, we’re an Australian-based company with our own unique flavours and designs."
   },
   {
     id: "expensive",
-    tests: [
-      /(why|so).*expensive/i,
-      /cost.*(high|much)/i
-    ],
-    answer: "We use high-quality, food-grade flavouring, custom-built inhalers, and we view quality and safety more importantly than producing a cheap flimsy product."
+    tests: [/(why|so).*expensive/i, /cost.*(high|much)/i],
+    answer:
+      "We use high-quality, food-grade flavouring, custom-built inhalers, and we view quality and safety more importantly than producing a cheap flimsy product."
   },
   {
     id: "sales",
-    tests: [
-      /any.*sale/i,
-      /discount.*code/i,
-      /promotion/i
-    ],
-    answer: "Yes — we sometimes run promotions. Sign up to our email list or follow us on social media for updates."
+    tests: [/any.*sale/i, /discount.*code/i, /promotion/i],
+    answer:
+      "Yes — we sometimes run promotions. Sign up to our email list or follow us on social media for updates."
   },
   {
     id: "tga-approved",
-    tests: [
-      /(tga|approved|approval)/i
-    ],
-    answer: "Since QUIT IT is not a medical device, there is no rout to have our inhaler tested and approved by TGA. That in mind, all our products have received private testing to be sure they meet all standards."
+    tests: [/(tga|approved|approval)/i],
+    answer:
+      "Since QUIT IT is not a medical device, there is no rout to have our inhaler tested and approved by TGA. That in mind, all our products have received private testing to be sure they meet all standards."
   },
   {
     id: "chemicals",
-    tests: [
-      /any.*chemicals/i,
-      /contain.*chemicals/i
-    ],
-    answer: "Our cores contain only food-grade natural and artificial flavourings. No nicotine, no tobacco, no harmful chemicals."
+    tests: [/any.*chemicals/i, /contain.*chemicals/i],
+    answer:
+      "Our cores contain only food-grade natural and artificial flavourings. No nicotine, no tobacco, no harmful chemicals."
   },
   {
     id: "australian-made",
-    tests: [
-      /(australian\s*made|made\s*in\s*australia)/i
-    ],
-    answer: "Our company is Australian-owned. Some components are sourced internationally, and all final assembly and quality control are handled here in Australia."
+    tests: [/(australian\s*made|made\s*in\s*australia)/i],
+    answer:
+      "Our company is Australian-owned. Some components are sourced internationally, and all final assembly and quality control are handled here in Australia."
   },
   {
     id: "made-in-china",
-    tests: [
-      /made\s*in\s*china/i
-    ],
-    answer: "Our company is Australian-owned. Some components are sourced internationally, and all final assembly and quality control are handled here in Australia."
+    tests: [/made\s*in\s*china/i],
+    answer:
+      "Our company is Australian-owned. Some components are sourced internationally, and all final assembly and quality control are handled here in Australia."
   },
   {
     id: "scam",
-    tests: [
-      /scam/i,
-      /(real|legit)/i
-    ],
-    answer: "We’re an Australian-registered business, with secure payment processing, an active customer service team, and thousands of happy customers. You can read verified reviews on our website."
+    tests: [/scam/i, /(real|legit)/i],
+    answer:
+      "We’re an Australian-registered business, with secure payment processing, an active customer service team, and thousands of happy customers. You can read verified reviews on our website."
   },
   {
     id: "buy-inhaler-only",
-    tests: [
-      /buy.*inhaler.*only/i,
-      /spare.*inhaler/i
-    ],
+    tests: [/buy.*inhaler.*only/i, /spare.*inhaler/i],
     answer: "Currently, our inhalers are only available in a starter pack."
   },
   {
     id: "order-in-qld",
-    tests: [
-      /order.*qld/i,
-      /queensland/i
-    ],
-    answer: "sometimes AusPost send orders via a different state, if your order has not moved for 3+ days, please reach out to support@quititaus.com.au and our team can help."
+    tests: [/order.*qld/i, /queensland/i],
+    answer:
+      "sometimes AusPost send orders via a different state, if your order has not moved for 3+ days, please reach out to support@quititaus.com.au and our team can help."
   },
   {
     id: "legal",
-    tests: [
-      /is.*legal/i
-    ],
+    tests: [/is.*legal/i],
     answer: "Yes — our products are 100% legal to buy and use in Australia."
   },
   {
     id: "lung-problems",
-    tests: [
-      /lung.*problem/i,
-      /harm.*lungs/i
-    ],
-    answer: "QUIT IT contains no harmful chemicals, smoke, or vapour. You’re breathing mostly clean air through food-grade flavouring."
+    tests: [/lung.*problem/i, /harm.*lungs/i],
+    answer:
+      "QUIT IT contains no harmful chemicals, smoke, or vapour. You’re breathing mostly clean air through food-grade flavouring."
   },
   {
     id: "under-18",
-    tests: [
-      /under\s*18/i,
-      /\bminor\b/i
-    ],
+    tests: [/under\s*18/i, /\bminor\b/i],
     answer: "Our products are intended for adults."
   },
   {
     id: "fill-stick",
-    tests: [
-      /(fill|refill).*(stick|core)/i
-    ],
-    answer: "You can’t refill a core — they’re designed for single use and last around 5 days. Once empty, replace it with a fresh one."
+    tests: [/(fill|refill).*(stick|core)/i],
+    answer:
+      "You can’t refill a core — they’re designed for single use and last around 5 days. Once empty, replace it with a fresh one."
   },
   {
     id: "cleaners",
-    tests: [
-      /clean(er|ing).*(inhaler|device|quit\s*it)/i
-    ],
-    answer: "Yes – all inhalers come with a pipe cleaner for the inside and a cloth for the outside of your inhaler. it is best to wipe it down every time you swap out flavours."
+    tests: [/clean(er|ing).*(inhaler|device|quit\s*it)/i],
+    answer:
+      "Yes – all inhalers come with a pipe cleaner for the inside and a cloth for the outside of your inhaler. it is best to wipe it down every time you swap out flavours."
   },
   {
     id: "replace-inhaler",
-    tests: [
-      /replace.*(inhaler|head)/i
-    ],
+    tests: [/replace.*(inhaler|head)/i],
     answer: "The inhaler does not need replacing, you just replace the cores."
-  },
+  }
 
 ];
 
