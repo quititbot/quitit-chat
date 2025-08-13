@@ -1,9 +1,10 @@
+<script>
 (function () {
   // prevent double-injection
   if (window.__QI_WIDGET_LOADED__) return;
   window.__QI_WIDGET_LOADED__ = true;
 
-  const WIDGET_BUILD = "fe-2025-08-13-09"; // bump for cache-bust
+  const WIDGET_BUILD = "fe-2025-08-13-08";
   console.log("QUIT IT widget build:", WIDGET_BUILD);
 
   // API (prod)
@@ -11,20 +12,21 @@
 
   // Brand palette
   const BRAND = {
-    green: "#1C3A3B",   // dark green (borders, header)
+    green: "#1C3A3B",   // borders, header
     orange: "#FF5800",
     chipBg: "#EEFFBD",
     chipText: "#1C3A3B",
-    iconBlue: "#007BFF" // launcher (chat icon) background
+    iconBlue: "#007BFF" // launcher button
   };
 
-  // ---------- minimal unanswered logger (added back) ----------
+  // ---- minimal unanswered logger (safe + de-duped) ----
   const __qiLogged = new Set();
   function logUnanswered(question) {
     try {
       const key = (question || "").toLowerCase().trim();
-      if (!key || __qiLogged.has(key)) return;
+      if (!key || __qiLogged.has(key)) return; // de-dupe on this page
       __qiLogged.add(key);
+
       fetch(API_BASE + "/api/log-unanswered", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -36,7 +38,7 @@
             tz: Intl.DateTimeFormat().resolvedOptions().timeZone
           }
         })
-      }).catch(() => {});
+      }).catch(() => {}); // fire-and-forget
     } catch {}
   }
 
@@ -68,13 +70,15 @@
 
   // Markdown cleaner
   function cleanBotText(s = "") {
-    return String(s).replace(/\*\*(.*?)\*\*/g, "$1").replace(/__([^_]+)__/g, "$1");
+    return String(s)
+      .replace(/\*\*(.*?)\*\*/g, "$1")
+      .replace(/__([^_]+)__/g, "$1");
   }
 
-  // Launcher
+  // Launcher (white chat glyph on blue)
   const launch = document.createElement("button");
   launch.className = "qi-launch";
-  launch.setAttribute("aria-label", "Open QUIT IT chat");
+  launch.setAttribute("aria-label","Open QUIT IT chat");
   launch.innerHTML = `
     <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">
       <path d="M4 6a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v6a4 4 0 0 1-4 4H10l-4 4v-4H8a4 4 0 0 1-4-4V6z"
@@ -82,8 +86,7 @@
       <circle cx="9" cy="9" r="1.2" fill="#FFFFFF"/>
       <circle cx="13" cy="9" r="1.2" fill="#FFFFFF"/>
       <circle cx="17" cy="9" r="1.2" fill="#FFFFFF"/>
-    </svg>
-  `;
+    </svg>`;
   document.body.appendChild(launch);
 
   // Chat window
@@ -170,13 +173,16 @@
       if (!res.ok) {
         const err = await res.text().catch(() => "");
         botBubble.textContent = `Server error (${res.status}). ${err.slice(0, 200)}`;
+        // (Optional) also log as unanswered when server errors
+        try { logUnanswered(text); } catch {}
         renderChips();
         return;
       }
 
       const ctype = (res.headers.get("content-type") || "").toLowerCase();
+
+      // (Your API returns JSON, but this keeps compatibility with SSE)
       if (ctype.includes("text/event-stream")) {
-        // kept for compatibility
         const reader = res.body.getReader();
         const dec = new TextDecoder();
         let buf = "", acc = "";
@@ -209,7 +215,7 @@
       const data = await res.json().catch(() => ({}));
       if (data?.build) console.log("API build:", data.build);
 
-      // Log misses (guarded)
+      // Log misses (grounded === false means fallback used)
       if (data && data.grounded === false) {
         try { logUnanswered(text); } catch {}
       }
@@ -221,9 +227,11 @@
         "I’m sorry, I don’t know the answer to that. You can rephrase the question or alternatively, you can contact our team via the contact form on our FAQ page and they should be able to help you out 😊";
       botBubble.textContent = cleanBotText(answer);
       renderChips();
+
     } catch (e) {
       console.error(e);
       botBubble.textContent = "Network error reaching the chat service.";
+      try { logUnanswered(text); } catch {}
     } finally {
       pending = false;
       sendBtn.disabled = false;
@@ -238,12 +246,14 @@
       renderChips();
     }
   };
+
   sendBtn.onclick = () => {
     const t = (input.value || "").trim();
     if (!t) return;
     input.value = "";
     ask(t);
   };
+
   input.addEventListener("keydown", e => {
     if (e.key === "Enter") { e.preventDefault(); sendBtn.click(); }
   });
@@ -251,3 +261,5 @@
   // quick debug hook
   window.QI_CHAT = { API_BASE, WIDGET_BUILD };
 })();
+</script>
+
