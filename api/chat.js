@@ -2,7 +2,7 @@
 // Emojis enabled, no caching, explicit UTF-8. No scraping.
 
 export default async function handler(req, res) {
-  const BUILD = "chat-2025-08-13-03";
+  const BUILD = "chat-2025-08-13-06"; // bump when you redeploy
 
   // ---- CORS + headers (UTF-8 + no cache) ----
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -17,7 +17,9 @@ export default async function handler(req, res) {
 
   // ---- Parse ----
   let body = {};
-  try { body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : (req.body || {}); } catch {}
+  try {
+    body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : (req.body || {});
+  } catch {}
   const q = (body?.message ?? body?.text ?? "").trim();
   if (!q) return res.status(400).json({ error: "Missing message", build: BUILD });
 
@@ -36,8 +38,11 @@ export default async function handler(req, res) {
     },
 
     // Order & payments
-    { id: "order-confirmation", tests: [/no.*(confirmation|email)/i, /(did|has).*(order).*(go.*through|placed)/i],
-      answer: "If you didn’t receive an order confirmation email, check your spam folder. Still can’t find it? Email **support@quititaus.com.au** and we’ll check your order for you." },
+    {
+      id: "order-confirmation",
+      tests: [/no.*(confirmation|email)/i, /(did|has).*(order).*(go.*through|placed)/i],
+      answer: "If you didn’t receive an order confirmation email, check your spam folder. Still can’t find it? Email **support@quititaus.com.au** and we’ll check your order for you."
+    },
     { id: "cancel-order", tests: [/cancel.*order/i],
       answer: "We can usually cancel within **1 hour** of purchase. After that, your order may already be on its way. Email **support@quititaus.com.au** and we’ll do our best." },
     { id: "payment-methods", tests: [/(payment|pay).*methods?/i, /(how|ways).*(pay|payment)/i],
@@ -70,7 +75,7 @@ export default async function handler(req, res) {
       answer: "Right now we deliver **Australia-wide only**. We’re exploring international shipping for the future." },
 
     // Refunds & returns
-    { id: "refund-policy", tests: [/refund|return policy|money back/i],
+    { id: "refund-policy", tests: [/refund|return(s?)\b|money back/i],
       answer: "For **hygiene reasons**, we can only accept returns of **unopened, unused** products within **30 days** of delivery." },
     { id: "product-damaged", tests: [/(broken|damaged|faulty)/i],
       answer: "So sorry about that! Please email photos within **48 hours** of delivery to **support@quititaus.com.au**, and we’ll organise a replacement." },
@@ -89,7 +94,7 @@ export default async function handler(req, res) {
     { id: "stronger-taste-tips", tests: [/(stronger).*(flavou?r|taste)/i],
       answer: "For a stronger feel: take **slower, deeper breaths**, try **covering the small side holes**, or **tighten the airflow** slightly." },
 
-    // Expanded flavour recommendations
+    // Flavour recommendations
     { id: "flavour-recommendations",
       tests: [/(which|best|recommend|suggest|choose|pick).*(flavou?rs?)/i, /(flavou?rs?).*(recommendation|recommendations|recs?)/i],
       answer: "Customer favourites are **Crisp Mint, Maple Pepper, Blueberry, and Coffee**. 🌿 If you like refreshing, go **Crisp Mint**. Sweet? **Blueberry**. Bold & cosy? **Coffee**. Unique sweet-spicy? **Maple Pepper**." },
