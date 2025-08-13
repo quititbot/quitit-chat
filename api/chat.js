@@ -30,6 +30,77 @@ export default async function handler(req, res) {
   // 1) REGEX FAQ — Most specific first
   // ---------------------------------------------------------------------------
 const FAQ = [
+
+// --- QUICK USE + FOLLOW-UPS (put these at the TOP of the FAQ array) ---
+{
+  id: "how-to-use-short",
+  tests: [
+    // "how do i use it" variants
+    /^(how( do| to)? (i )?use( this| it)?\??)$/i,
+    /how.*use( it| this| the (device|inhaler))?/i,
+    /how.*start/i,
+    /getting.*started/i,
+    /(what|how).*(do|to).*(i|you).*(use|work)/i,
+    /how.*does.*(it|this|the (device|inhaler)).*work/i,
+
+    // “am I using it right / correctly”
+    /(am|are).*(i|we).*(using|doing).*(it|this).*(right|correct(ly)?)/i,
+    /use.*correct(ly)?/i,
+
+    // “instructions / manual / guide”
+    /(no|missing).*instructions/i,
+    /(user|quick).*guide/i,
+    /manual/i,
+
+    // “broken?” (we’ll steer them to the use basics first)
+    /(is|it('?s)?)\s*(broken|faulty|defective)/i
+  ],
+  answer:
+    "Just pop in a core and breathe in **slowly** through the tip — no button, no heat, no vapour. Twist the **black tip** to adjust airflow. Flavour is intentionally **subtle** and often builds over the first couple of days. Each core lasts about **5 days**. 🌿"
+},
+
+{
+  id: "cant-taste-anything",
+  tests: [
+    // “can’t taste / no taste / weak taste”
+    /can('?t| not)\s*(taste|feel)\s*anything/i,
+    /(no|not getting)\s*(taste|flavou?r)/i,
+    /(taste|flavou?r)\s*(too\s*)?(weak|light|faint|subtle)/i,
+    /(no|not enough)\s*(flavou?r|taste|scent)/i,
+    /i.*barely.*(taste|flavou?r)/i,
+
+    // “not strong / not hitting / no hit”
+    /(not|no)\s*(hit|throat hit|kick)/i,
+    /(not|no)\s*(strong|strength)/i,
+
+    // “is it working? nothing’s happening”
+    /(is|it('?s)?)\s*(working|work)/i,
+    /(nothing|no)\s*(coming out|happening)/i,
+
+    // “like a vape?”
+    /(does|should).*(it|this).*(hit|feel).*(like).*(a )?(vape|ecig|cigarette)/i
+  ],
+  answer:
+    "QUIT IT is designed to be **gentle** — not like a vape. You’re breathing mostly air that’s naturally flavoured as it passes through the core. Try **slower, deeper breaths**, cover a **small side hole** for a stronger feel, or **tighten the airflow** slightly. Many people notice flavour more after **day 2–3**. If it still feels off, we’re happy to help at **support@quititaus.com.au** 😊"
+},
+
+{
+  id: "no-vapour-expectation",
+  tests: [
+    // “no vapour/smoke/steam/clouds”
+    /(no|not seeing)\s*(vapou?r|smoke|steam|clouds?)/i,
+    /(should|is).*(there be|i see).*(vapou?r|smoke)/i,
+    /(why).*(no).*(vapou?r|smoke)/i,
+
+    // “doesn’t feel like a vape / no button”
+    /(no|not using)\s*button/i,
+    /(is|should).*(there be).*(a )?button/i,
+    /(does|should).*(feel|hit).*(like).*(vape|ecig|cigarette)/i
+  ],
+  answer:
+    "That’s expected — **no vapour, no smoke, no heat**. The flavour is **subtle by design**. Breathe in slowly through the tip and tweak the **airflow** by twisting the black tip. If you want more sensation, cover a **side hole** while inhaling. 🌿"
+}
+
   // Speak to a person
   {
     id: "speak-to-person",
