@@ -56,7 +56,7 @@ const FAQ = [
     /(is|it('?s)?)\s*(broken|faulty|defective)/i
   ],
   answer:
-    "Just pop in a core and breathe in **slowly** through the tip — no button, no heat, no vapour. Twist the **black tip** to adjust airflow. Flavour is intentionally **subtle** and often builds over the first couple of days. Each core lasts about **5 days**. 🌿"
+    "Just pop in a core and breathe in **slowly** through the tip — no button, no heat, no vapour. Twist the **tip** to adjust airflow. Flavour is intentionally **subtle** and often builds over the first couple of days. Each core lasts about **5 days**. 🌿"
 },
 
 {
@@ -81,7 +81,7 @@ const FAQ = [
     /(does|should).*(it|this).*(hit|feel).*(like).*(a )?(vape|ecig|cigarette)/i
   ],
   answer:
-    "QUIT IT is designed to be **gentle** — not like a vape. You’re breathing mostly air that’s naturally flavoured as it passes through the core. Try **slower, deeper breaths**, cover a **small side hole** for a stronger feel, or **tighten the airflow** slightly. Many people notice flavour more after **day 2–3**. If it still feels off, we’re happy to help at **support@quititaus.com.au** 😊"
+    "QUIT IT is designed to be **gentle** — not like a vape. You’re breathing mostly air that’s naturally flavoured as it passes through the core. Try **slower, deeper breaths**, play around with the **airflow** to see what works best for you. Many people notice flavour more after **day 2–3**. If it still feels off, we’re happy to help at **support@quititaus.com.au** 😊"
 },
 
 {
@@ -98,7 +98,7 @@ const FAQ = [
     /(does|should).*(feel|hit).*(like).*(vape|ecig|cigarette)/i
   ],
   answer:
-    "That’s expected — **no vapour, no smoke, no heat**. The flavour is **subtle by design**. Breathe in slowly through the tip and tweak the **airflow** by twisting the black tip. If you want more sensation, cover a **side hole** while inhaling. 🌿"
+    "That’s expected — **no vapour, no smoke, no heat**. The flavour is **subtle by design**. Breathe in slowly through the tip and tweak the **airflow** by twisting the tip. 🌿"
 },
 
   // Speak to a person
