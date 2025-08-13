@@ -2,6 +2,8 @@
 // Friendly, consistent answers with broad phrasing coverage. CORS enabled.
 
 export default async function handler(req, res) {
+  const BUILD = "chat-2025-08-13-02"; // bump to verify deploys
+
   // ---- CORS ----
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
@@ -14,7 +16,7 @@ export default async function handler(req, res) {
   let body = {};
   try { body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : (req.body || {}); } catch {}
   const q = (body?.message ?? body?.text ?? "").trim();
-  if (!q) return res.status(400).json({ error: "Missing message" });
+  if (!q) return res.status(400).json({ error: "Missing message", build: BUILD });
 
   // ---- Fallback ----
   const FALLBACK =
@@ -133,7 +135,7 @@ export default async function handler(req, res) {
     // Product & usage
     {
       id: "how-long-cores-last",
-      tests: [/how long.*(flavour|flavor).*core/i, /(cores?).*(last)/i],
+      tests: [/how long.*(flavou?r).*core/i, /(cores?).*(last)/i],
       answer:
         "A pack has **3 cores**. Each core lasts around **5 days** with regular use — so your Starter Pack is designed to last **about a month**."
     },
@@ -149,26 +151,28 @@ export default async function handler(req, res) {
     },
     {
       id: "weak-flavour-normal",
-      tests: [/(weak).*(flavour|flavor)/i, /(taste).*(weak|light)/i],
+      tests: [/(weak).*(flavou?r)/i, /(taste).*(weak|light)/i],
       answer:
         "Yes — QUIT IT is intentionally **subtle** compared to vaping (no vapour or heat). Many people find the flavour builds after the first couple of days."
     },
     {
       id: "stronger-taste-tips",
-      tests: [/(stronger).*(flavour|flavor|taste)/i],
+      tests: [/(stronger).*(flavou?r|taste)/i],
       answer:
         "For a stronger feel: take **slower, deeper breaths**, try **covering the small side holes**, or **tighten the airflow** slightly."
     },
+
+    // 🔸 Expanded flavour recommendations (singular/plural + many verbs)
     {
       id: "flavour-recommendations",
       tests: [
-        /(which|best|recommend).*(flavour|flavor)/i,
-        /(flavour|flavor)\s*(recommend|recommendation|recs?)/i,
-        /^flavour recommendation$/i, /^flavor recommendation$/i
+        /(which|best|recommend|suggest|choose|pick).*(flavou?rs?)/i,
+        /(flavou?rs?).*(recommendation|recommendations|recs?)/i
       ],
       answer:
         "Customer favourites are **Crisp Mint, Maple Pepper, Blueberry, and Coffee**. 🌿 If you like refreshing, go **Crisp Mint**. Sweet? **Blueberry**. Bold & cosy? **Coffee**. Unique sweet-spicy? **Maple Pepper**."
     },
+
     {
       id: "feel-like-cigarette",
       tests: [/feel.*(smok|cigarette)/i, /(like).*(cigarette)/i],
@@ -187,10 +191,11 @@ export default async function handler(req, res) {
       answer:
         "We recommend showing your GP our full ingredient list before use. Here’s the list: https://cdn.shopify.com/s/files/1/0918/0941/5477/files/Ingredient_List.pdf?v=1750225464"
     },
+
+    // UPDATED ingredients answer
     {
       id: "whats-inside-cores",
       tests: [/what('s| is).*inside.*core/i, /ingredients.*core/i],
-      // UPDATED per your wording
       answer:
         "There’s **no nicotine**. No tobacco. No artificial additives. Just a blend of:\n\n• **Essential oils**\n• **Natural flavour compounds**\n• **Organic plant extracts**\n\nAll infused into a **medical-grade polyester core** that delivers smooth, safe inhalation."
     },
@@ -259,7 +264,8 @@ export default async function handler(req, res) {
       answer: regexHit.answer.trim(),
       grounded: true,
       source: "faq",
-      id: regexHit.id
+      id: regexHit.id,
+      build: BUILD
     });
   }
 
@@ -275,6 +281,7 @@ export default async function handler(req, res) {
       .trim();
   }
   const N = normalize(q);
+
   const ANSWERS = {
     speakToPerson:
       "Outside of the chatbot, our team’s happy to help! Please email support@quititaus.com.au with your name and order number (if you have one), and we’ll get back to you as soon as we can. 💚",
@@ -323,7 +330,18 @@ export default async function handler(req, res) {
   const INTENTS = [
     { id: "speakToPerson", any: ["speak to a person","human agent","real person","talk to human","contact support","talk to a person"] },
 
-    { id: "flavourRecs", any: ["flavour recommendation","flavor recommendation","which flavour","which flavor","best flavour","best flavor","recommend a flavour","recommend a flavor","which flavour should i pick","which flavor should i pick"] },
+    // Expanded flavour phrasings
+    { id: "flavourRecs", any: [
+      "flavour recommendation","flavor recommendation","flavour recommendations","flavor recommendations",
+      "flavour rec","flavour recs","flavor rec","flavor recs",
+      "recommend flavour","recommend flavours","recommend flavors","recommend a flavour","recommend a flavor",
+      "best flavour","best flavours","best flavor","best flavors",
+      "which flavour","which flavour should i pick","which flavour should i choose",
+      "which flavors","which flavor","which flavor should i pick","which flavor should i choose",
+      "flavour suggestions","flavor suggestions","suggest a flavour","suggest a flavor",
+      "pick a flavour","pick a flavor","choose a flavour","choose a flavor",
+      "what are best flavours","what are the best flavours","what are the best flavors"
+    ] },
 
     { id: "funFact", any: ["fun fact","something interesting","interesting fact","tell me something interesting"] },
 
@@ -369,12 +387,13 @@ export default async function handler(req, res) {
         answer,
         grounded: true,
         source: "faq_keywords",
-        id: intent.id
+        id: intent.id,
+        build: BUILD
       });
     }
   }
 
   // Nothing matched → friendly fallback
-  return res.status(200).json({ answer: FALLBACK, grounded: false, source: "none" });
+  return res.status(200).json({ answer: FALLBACK, grounded: false, source: "none", build: BUILD });
 }
 
