@@ -419,7 +419,7 @@ const FAQ = [
       /replace.*(inhaler|head)/i
     ],
     answer: "The inhaler does not need replacing, you just replace the cores."
-  }
+  },
 ]
 
 ];
