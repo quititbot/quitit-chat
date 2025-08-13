@@ -62,41 +62,40 @@ const FAQ = [
 {
   id: "cant-taste-anything",
   tests: [
-   id: "cant-taste-anything",
-  tests: [
     // Common direct statements
-    /can('?t| not)\s*(taste|feel)\s*anything/i,
+    /can(?:'?t| not)\s*(?:taste|feel)\s*anything/i,
     /(no|not getting|zero|hardly|barely|can't really)\s*(taste|flavou?r)/i,
-    /(taste|flavou?r)\s*(too\s*)?(weak|light|faint|subtle|low)/i,
+    /(taste|flavou?r)\s*(?:too\s*)?(weak|light|faint|subtle|low)/i,
     /(no|not enough|zero)\s*(flavou?r|taste|scent)/i,
     /flavou?r\s*very\s*(weak|light|faint|subtle)/i,
 
     // Typos & misspellings
-    /cant\s*tast\b/i, // missing 'e' in taste
-    /flavo?r\b/i,     // missing 'u' or typos in flavour
-    /flavou?r.*week/i, // 'week' instead of 'weak'
+    /cant\s*tast\b/i,            // missing 'e' in taste
+    /\bflavo?r\b/i,              // 'flavor/flavour' typo
+    /flavou?r.*\bweek\b/i,       // 'week' instead of 'weak'
 
     // Conversational variants
     /i.*barely.*(taste|flavou?r)/i,
-    /(no|zero)\s*flavou?r/i,
+    /\b(no|zero)\s*flavou?r\b/i,
     /hardly.*(taste|flavou?r)/i,
     /(flavou?r|taste)\s*is\s*gone/i,
-    /(flavou?r|taste)\s*not\s*(strong|there|good)/i
+    /(flavou?r|taste)\s*not\s*(strong|there|good)/i,
 
     // “not strong / not hitting / no hit”
     /(not|no)\s*(hit|throat hit|kick)/i,
     /(not|no)\s*(strong|strength)/i,
 
     // “is it working? nothing’s happening”
-    /(is|it('?s)?)\s*(working|work)/i,
+    /(is|it'?s)\s*(working|work)/i,
     /(nothing|no)\s*(coming out|happening)/i,
 
     // “like a vape?”
-    /(does|should).*(it|this).*(hit|feel).*(like).*(a )?(vape|ecig|cigarette)/i
+    /(does|should).*(it|this).*(hit|feel).*(like).*(a )?(vape|e-?cig|cigarette)/i
   ],
   answer:
-    "QUIT IT is designed to be **gentle** — not like a vape. You’re breathing mostly air that’s naturally flavoured as it passes through the core. Try **slower, deeper breaths**, play around with the **airflow** to see what works best for you. Many people notice flavour more after **day 2–3**. If it still feels off, we’re happy to help at **support@quititaus.com.au** 😊"
-},
+    "QUIT IT is designed to be **gentle** — not like a vape. You’re breathing mostly air that’s naturally flavoured as it passes through the core. Try **slower, deeper breaths**, adjust the **airflow** (twist the black tip), or briefly **cover a side hole** for a stronger feel. Many people notice flavour more after **day 2–3**. If it still feels off, we’re happy to help at **support@quititaus.com.au** 😊"
+}
+
 
 {
   id: "no-vapour-expectation",
