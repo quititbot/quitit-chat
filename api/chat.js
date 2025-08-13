@@ -1,5 +1,5 @@
-// /api/chat.js — QUIT IT canned-answers assistant (no web scraping)
-// Friendly tone + emojis, PDF blocking kept for future use, CORS enabled.
+// /api/chat.js — QUIT IT canned assistant (regex + keyword intents, no scraping)
+// Friendly, consistent answers with broad phrasing coverage. CORS enabled.
 
 export default async function handler(req, res) {
   // ---- CORS ----
@@ -10,18 +10,21 @@ export default async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(204).end();
   if (req.method !== "POST") return res.status(405).send("Method not allowed");
 
-  // ---- Parse body ----
+  // ---- Parse ----
   let body = {};
   try { body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : (req.body || {}); } catch {}
   const q = (body?.message ?? body?.text ?? "").trim();
   if (!q) return res.status(400).json({ error: "Missing message" });
 
-  // ---- Friendly fallback ----
-  const FALLBACK = "I’m sorry, I don’t know the answer to that. You can contact our team at support@quititaus.com.au and they should be able to help you out 😊";
+  // ---- Fallback ----
+  const FALLBACK =
+    "I’m sorry, I don’t know the answer to that. You can contact our team at support@quititaus.com.au and they should be able to help you out 😊";
 
-  // ---- CANNED Q&A (order matters; most specific first) ----
+  // ---------------------------------------------------------------------------
+  // 1) REGEX FAQ — Most specific first
+  // ---------------------------------------------------------------------------
   const FAQ = [
-    // Contact / speak to a person
+    // Speak to a person
     {
       id: "speak-to-person",
       tests: [/speak.*(person|agent|human)/i, /(contact|support|help).*(team|person)/i, /(live|real).*(chat|person)/i],
@@ -29,12 +32,12 @@ export default async function handler(req, res) {
         "Outside of the chatbot, our team’s happy to help! Please email **support@quititaus.com.au** with your name and order number (if you have one), and we’ll get back to you as soon as we can. 💚"
     },
 
-    // Order + payments
+    // Order & payments
     {
       id: "order-confirmation",
       tests: [/no.*(confirmation|email)/i, /(did|has).*(order).*(go.*through|placed)/i],
       answer:
-        "If you didn’t receive an order confirmation email, please check your spam folder. Still can’t find it? Email **support@quititaus.com.au** and we’ll check your order for you."
+        "If you didn’t receive an order confirmation email, check your spam folder. Still can’t find it? Email **support@quititaus.com.au** and we’ll check your order for you."
     },
     {
       id: "cancel-order",
@@ -45,14 +48,12 @@ export default async function handler(req, res) {
     {
       id: "payment-methods",
       tests: [/(payment|pay).*methods?/i, /(how|ways).*(pay|payment)/i],
-      answer:
-        "We accept **Visa, Mastercard, PayPal, and Afterpay**."
+      answer: "We accept **Visa, Mastercard, PayPal, and Afterpay**."
     },
     {
       id: "afterpay",
       tests: [/afterpay/i, /(buy now|pay later)/i],
-      answer:
-        "Yes — **Afterpay** is available at checkout."
+      answer: "Yes — **Afterpay** is available at checkout."
     },
 
     // Address changes
@@ -60,21 +61,19 @@ export default async function handler(req, res) {
       id: "change-address",
       tests: [/change.*address/i, /(edit|update).*(shipping|address)/i],
       answer:
-        "As we usually dispatch all orders the same day, any changes should be made within **1 hour** of checkout.\n\nPlease email **support@quititaus.com.au** with:\n- your name\n- order number\n- updated shipping details"
+        "As we usually dispatch orders the same day, changes should be made within **1 hour** of checkout.\n\nPlease email **support@quititaus.com.au** with:\n- your name\n- order number\n- updated shipping details"
     },
 
     // Stock / sold out
     {
       id: "oos-when-back",
       tests: [/when.*(back|restock|in stock)/i, /(sold out).*(when|back|restock)/i],
-      answer:
-        "When a product is listed as **sold out**, it’s usually back in stock within **1–2 weeks**."
+      answer: "When a product is **sold out**, it’s usually back in stock within **1–2 weeks**."
     },
     {
       id: "what-sold-out-means",
       tests: [/what does.*sold out/i, /^sold out\??$/i],
-      answer:
-        "“Sold out” means we’re temporarily out of stock. We typically restock within **1–2 weeks**."
+      answer: "“Sold out” means we’re temporarily out of stock. We typically restock within **1–2 weeks**."
     },
 
     // Shipping & tracking
@@ -87,8 +86,7 @@ export default async function handler(req, res) {
     {
       id: "express-shipping",
       tests: [/express/i, /fast.*shipping/i],
-      answer:
-        "Yes — **Express Post** is available at checkout for faster delivery."
+      answer: "Yes — **Express Post** is available at checkout for faster delivery."
     },
     {
       id: "tracking-link",
@@ -106,21 +104,19 @@ export default async function handler(req, res) {
       id: "routing-other-state",
       tests: [/(route|routed|went).*(state|different state)/i],
       answer:
-        "No need to worry — this sometimes happens with Australia Post’s network. If it hasn’t moved for a few days, email **support@quititaus.com.au** and we’ll check it."
+        "No need to worry — this sometimes happens within the AusPost network. If it hasn’t moved for a few days, email **support@quititaus.com.au** and we’ll check it."
     },
     {
       id: "international-shipping",
       tests: [/international|overseas|ship.*(international|worldwide)/i],
-      answer:
-        "Right now we deliver **Australia-wide only**. We’re exploring international shipping for the future."
+      answer: "Right now we deliver **Australia-wide only**. We’re exploring international shipping for the future."
     },
 
     // Refunds & returns
     {
       id: "refund-policy",
       tests: [/refund|return policy|money back/i],
-      answer:
-        "For **hygiene reasons**, we can only accept returns of **unopened, unused** products within **30 days** of delivery."
+      answer: "For **hygiene reasons**, we can only accept returns of **unopened, unused** products within **30 days** of delivery."
     },
     {
       id: "product-damaged",
@@ -131,8 +127,7 @@ export default async function handler(req, res) {
     {
       id: "product-missing",
       tests: [/(missing|shortage)/i],
-      answer:
-        "That’s not right — please email **support@quititaus.com.au** within **48 hours** of delivery and we’ll fix it."
+      answer: "That’s not right — please email **support@quititaus.com.au** within **48 hours** of delivery and we’ll fix it."
     },
 
     // Product & usage
@@ -145,14 +140,12 @@ export default async function handler(req, res) {
     {
       id: "activate-core",
       tests: [/activate.*core/i, /prim(e|ing).*core/i],
-      answer:
-        "**No priming** needed — just insert the core and start using. If it feels dry, rotate the core or pop in a fresh one."
+      answer: "**No priming** needed — just insert the core and start using. If it feels dry, rotate the core or pop in a fresh one."
     },
     {
       id: "adjust-airflow",
       tests: [/adjust.*(airflow|draw|resistance)/i, /(airflow|draw).*(change|tighter|looser)/i],
-      answer:
-        "Twist the **black tip** to adjust airflow — tighter for more resistance, looser for an easier draw."
+      answer: "Twist the **black tip** to adjust airflow — tighter for more resistance, looser for an easier draw."
     },
     {
       id: "weak-flavour-normal",
@@ -168,7 +161,11 @@ export default async function handler(req, res) {
     },
     {
       id: "flavour-recommendations",
-      tests: [/(which|best|recommend).*(flavour|flavor)/i, /(pick|choose).*(flavour|flavor)/i],
+      tests: [
+        /(which|best|recommend).*(flavour|flavor)/i,
+        /(flavour|flavor)\s*(recommend|recommendation|recs?)/i,
+        /^flavour recommendation$/i, /^flavor recommendation$/i
+      ],
       answer:
         "Customer favourites are **Crisp Mint, Maple Pepper, Blueberry, and Coffee**. 🌿 If you like refreshing, go **Crisp Mint**. Sweet? **Blueberry**. Bold & cosy? **Coffee**. Unique sweet-spicy? **Maple Pepper**."
     },
@@ -193,8 +190,9 @@ export default async function handler(req, res) {
     {
       id: "whats-inside-cores",
       tests: [/what('s| is).*inside.*core/i, /ingredients.*core/i],
+      // UPDATED per your wording
       answer:
-        "Each core is made from an **organic cotton and gauze** blend, infused with our **natural essential oil blend**. **No nicotine**, no artificial chemicals."
+        "There’s **no nicotine**. No tobacco. No artificial additives. Just a blend of:\n\n• **Essential oils**\n• **Natural flavour compounds**\n• **Organic plant extracts**\n\nAll infused into a **medical-grade polyester core** that delivers smooth, safe inhalation."
     },
 
     // Cleaning / care
@@ -211,7 +209,7 @@ export default async function handler(req, res) {
         "Keep cores sealed in their pouch until use, and store your inhaler in a **cool, dry place** away from direct sunlight."
     },
 
-    // Motivation & quitting support
+    // Motivation & engagement
     {
       id: "how-this-helps",
       tests: [/(how|why).*(help).*(quit)/i],
@@ -222,7 +220,7 @@ export default async function handler(req, res) {
       id: "success-tips",
       tests: [/(tips|advice).*(quit|cravings?)/i],
       answer:
-        "Keep your inhaler handy for cravings, replace the core **every ~5 days**, and set small goals. Many customers find pairing QUIT IT with a plan or journal helps a lot. 💪"
+        "Keep your inhaler handy for cravings, replace the core **every ~5 days**, and set small goals. Pairing QUIT IT with a plan or journal helps a lot. 💪"
     },
     {
       id: "when-to-use",
@@ -245,29 +243,136 @@ export default async function handler(req, res) {
         "Quitting takes real willpower and results vary — our product isn’t magic. We **don’t** offer a guarantee, but we’re here to help you get the most from your inhaler."
     },
 
-    // Fun / light
+    // Fun / interesting
     {
       id: "fun-fact",
-      tests: [/fun fact|interesting/i],
+      tests: [/(fun fact)/i, /(tell me something interesting)/i, /\binteresting\b/i],
       answer:
-        "Many customers report fewer cravings in the **first week**, and the savings add up fast compared to smoking. 🙌"
+        "Here’s a fun one: many QUIT IT customers say cravings drop in the **first week**, and the savings add up fast compared to smoking. 🙌"
     },
   ];
 
-  // ---- Match helper ----
-  const hit = FAQ.find(item => item.tests.some(rx => rx.test(q)));
-  if (hit) {
+  // Regex hit?
+  const regexHit = FAQ.find(item => item.tests.some(rx => rx.test(q)));
+  if (regexHit) {
     return res.status(200).json({
-      answer: hit.answer.trim(),
+      answer: regexHit.answer.trim(),
       grounded: true,
       source: "faq",
-      id: hit.id
+      id: regexHit.id
     });
   }
 
-  // ---- (Optional) future: web/page extraction
-  // Keeping PDF block patterns here for when/if you re-enable page lookup.
-  void [/\.pdf($|\?)/i, /cdn\.shopify\.com\/.*\.pdf/i];
+  // ---------------------------------------------------------------------------
+  // 2) KEYWORD INTENT MATCHER — forgiving paraphrases
+  // ---------------------------------------------------------------------------
+  function normalize(s) {
+    return (s || "")
+      .toLowerCase()
+      .replace(/['’]/g, "")
+      .replace(/[^a-z0-9\s]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+  const N = normalize(q);
+  const ANSWERS = {
+    speakToPerson:
+      "Outside of the chatbot, our team’s happy to help! Please email support@quititaus.com.au with your name and order number (if you have one), and we’ll get back to you as soon as we can. 💚",
+    flavourRecs:
+      "Customer favourites are **Crisp Mint, Maple Pepper, Blueberry, and Coffee**. 🌿 If you like refreshing, go **Crisp Mint**. Sweet? **Blueberry**. Bold & cosy? **Coffee**. Unique sweet-spicy? **Maple Pepper**.",
+    funFact:
+      "Here’s a fun one: many QUIT IT customers say cravings drop in the **first week**, and the savings add up fast compared to smoking. 🙌",
+    shippingTimes:
+      "We ship **daily from Melbourne**. Most orders arrive within **2–6 business days** depending on location. You’ll receive an **AusPost tracking email** once it ships. 🚚",
+    express:
+      "Yes — **Express Post** is available at checkout for faster delivery.",
+    tracking:
+      "You’ll get an **Australia Post tracking link** by email when your order ships. Can’t find it? Check spam or email **support@quititaus.com.au** and we’ll resend it.\nYou can also use our tracker: https://quititaus.com.au/apps/track123",
+    orderStuck:
+      "Australia Post can sometimes scan late or skip scans. If your parcel hasn’t moved for **3 business days**, email us and we’ll follow up: **support@quititaus.com.au**.",
+    changeAddress:
+      "As we usually dispatch orders the same day, changes should be made within **1 hour** of checkout.\n\nPlease email **support@quititaus.com.au** with:\n- your name\n- order number\n- updated shipping details",
+    refunds:
+      "For **hygiene reasons**, we can only accept returns of **unopened, unused** products within **30 days** of delivery.",
+    soldOut:
+      "“Sold out” means we’re temporarily out of stock. We typically restock within **1–2 weeks**.",
+    whenBack:
+      "When a product is **sold out**, it’s usually back in stock within **1–2 weeks**.",
+    afterpay:
+      "Yes — **Afterpay** is available at checkout.",
+    payments:
+      "We accept **Visa, Mastercard, PayPal, and Afterpay**.",
+    intlShipping:
+      "Right now we deliver **Australia-wide only**. We’re exploring international shipping for the future.",
+    safeUse:
+      "QUIT IT uses **plant-based essential oils**, and you’re breathing mostly air that passes through a flavoured core. We can’t give medical advice — please check with your GP if you have any concerns.",
+    pregnancy:
+      "We recommend showing your GP our full ingredient list before use. Here’s the list: https://cdn.shopify.com/s/files/1/0918/0941/5477/files/Ingredient_List.pdf?v=1750225464",
+    feelLikeCig:
+      "The inhaler has **adjustable airflow** and mimics the **hand-to-mouth action** and draw of a cigarette. It won’t feel exactly the same — that’s on purpose — but it gives a familiar motion without smoke or vapour.",
+    coresLast:
+      "A pack has **3 cores**. Each core lasts around **5 days** with regular use — so your Starter Pack is designed to last **about a month**.",
+    strongerTaste:
+      "For a stronger feel: take **slower, deeper breaths**, try **covering the small side holes**, or **tighten the airflow** slightly.",
+    adjustAirflow:
+      "Twist the **black tip** to adjust airflow — tighter for more resistance, looser for an easier draw.",
+    whatsInside:
+      "There’s **no nicotine**. No tobacco. No artificial additives. Just a blend of:\n\n• **Essential oils**\n• **Natural flavour compounds**\n• **Organic plant extracts**\n\nAll infused into a **medical-grade polyester core** that delivers smooth, safe inhalation.",
+  };
+
+  const INTENTS = [
+    { id: "speakToPerson", any: ["speak to a person","human agent","real person","talk to human","contact support","talk to a person"] },
+
+    { id: "flavourRecs", any: ["flavour recommendation","flavor recommendation","which flavour","which flavor","best flavour","best flavor","recommend a flavour","recommend a flavor","which flavour should i pick","which flavor should i pick"] },
+
+    { id: "funFact", any: ["fun fact","something interesting","interesting fact","tell me something interesting"] },
+
+    { id: "shippingTimes", any: ["how long shipping","shipping time","delivery time","how long does shipping take","when will my order arrive"] },
+
+    { id: "express", any: ["express post","express shipping","faster shipping"] },
+
+    { id: "tracking", any: ["track my order","tracking link","tracking number","how do i track","where is my order","track order"] },
+
+    { id: "orderStuck", any: ["tracking stuck","not moving","no update","parcel stuck","package stuck"] },
+
+    { id: "changeAddress", any: ["change address","update address","edit address","wrong address"] },
+
+    { id: "refunds", any: ["refund","return policy","money back","returns"] },
+
+    { id: "soldOut", any: ["what does sold out mean","what is sold out"] },
+    { id: "whenBack", any: ["when back in stock","back in stock","restock when","when restock"] },
+
+    { id: "afterpay", any: ["afterpay","buy now pay later"] },
+    { id: "payments", any: ["payment methods","how can i pay","ways to pay"] },
+
+    { id: "intlShipping", any: ["international shipping","ship overseas","ship internationally","worldwide shipping"] },
+
+    { id: "safeUse", any: ["is it safe","safe to use","safety"] },
+    { id: "pregnancy", any: ["pregnant","pregnancy","safe while pregnant","safe during pregnancy"] },
+
+    { id: "feelLikeCig", any: ["feel like a cigarette","does it feel like smoking","feel like smoking"] },
+
+    { id: "coresLast", any: ["how long do the cores last","core last","how long flavour cores last","how long flavor cores last"] },
+
+    { id: "strongerTaste", any: ["stronger taste","stronger flavour","stronger flavor","flavour too weak","flavor too weak"] },
+
+    { id: "adjustAirflow", any: ["adjust airflow","change draw","more resistance","looser draw","tighter draw"] },
+
+    { id: "whatsInside", any: ["whats inside the flavour cores","what is inside the flavour cores","ingredients in core","what’s inside cores","whats inside cores"] },
+  ];
+
+  const intent = INTENTS.find(it => it.any.some(k => N.includes(k)));
+  if (intent) {
+    const answer = ANSWERS[intent.id];
+    if (answer) {
+      return res.status(200).json({
+        answer,
+        grounded: true,
+        source: "faq_keywords",
+        id: intent.id
+      });
+    }
+  }
 
   // Nothing matched → friendly fallback
   return res.status(200).json({ answer: FALLBACK, grounded: false, source: "none" });
