@@ -420,7 +420,7 @@ const FAQ = [
     ],
     answer: "The inhaler does not need replacing, you just replace the cores."
   },
-]
+],
 
 ];
 
