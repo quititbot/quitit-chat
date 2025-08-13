@@ -1,11 +1,13 @@
-(function(){
-  // HARD-SET API to prod to bypass any detection/caching weirdness
-  const API_BASE = "https://quitit-chat.vercel.app"; // <— force prod
+(function () {
+  // prevent double-injection
+  if (window.__QI_WIDGET_LOADED__) return;
+  window.__QI_WIDGET_LOADED__ = true;
 
-  // --- Brand ---
+  // HARD-SET API to prod
+  const API_BASE = "https://quitit-chat.vercel.app";
+
   const BRAND = { green:"#1C3A3B", orange:"#FF5B00", chipBg:"#EEFFBD", chipText:"#1C3A3B" };
 
-  // --- Styles ---
   const style = document.createElement("style");
   style.textContent = `
   .qi-launch{position:fixed;right:18px;bottom:18px;width:56px;height:56px;border-radius:50%;background:${BRAND.green};display:grid;place-items:center;z-index:999999;border:none;box-shadow:0 10px 25px rgba(0,0,0,.18);cursor:pointer;transition:transform .15s}
@@ -25,19 +27,25 @@
   .qi-input{width:100%;display:flex;gap:8px}
   .qi-input input{flex:1;border:1px solid #ddd;border-radius:14px;padding:10px 12px;font:13px system-ui}
   .qi-input button{border:none;background:${BRAND.orange};color:#fff;border-radius:14px;padding:10px 14px;font:600 12px system-ui;cursor:pointer}
+  .qi-input button[disabled]{opacity:.6;cursor:not-allowed}
   .qi-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
   .qi-chip{border:1px solid #d7e9c0;background:${BRAND.chipBg};color:${BRAND.chipText};border-radius:999px;padding:6px 10px;font:12px system-ui;cursor:pointer}
   `;
   document.head.appendChild(style);
 
   // Launcher
-  const launch=document.createElement("button"); launch.className="qi-launch";
-  const logo=document.createElement("img"); logo.alt="QUIT IT"; logo.src="https://via.placeholder.com/60x60.png?text=QI";
-  launch.appendChild(logo); document.body.appendChild(launch);
+  const launch = document.createElement("button");
+  launch.className = "qi-launch";
+  const logo = document.createElement("img");
+  logo.alt = "QUIT IT";
+  logo.src = "https://via.placeholder.com/60x60.png?text=QI"; // replace with your hosted logo if needed
+  launch.appendChild(logo);
+  document.body.appendChild(launch);
 
   // Chat window
-  const box=document.createElement("div"); box.className="qi-box";
-  box.innerHTML=`
+  const box = document.createElement("div");
+  box.className = "qi-box";
+  box.innerHTML = `
     <div class="qi-head">
       <div class="qi-title">QUIT IT Support</div>
       <div class="qi-sub" style="margin-left:8px;">Hi! Ask me anything</div>
@@ -52,124 +60,143 @@
     </div>`;
   document.body.appendChild(box);
 
-  const body=box.querySelector(".qi-body");
-  const chips=box.querySelector(".qi-chips");
-  const input=box.querySelector("input");
-  const sendBtn=box.querySelector("button");
+  const body = box.querySelector(".qi-body");
+  const chips = box.querySelector(".qi-chips");
+  const input = box.querySelector("input");
+  const sendBtn = box.querySelector("button");
 
-  function push(role,text){
-    const row=document.createElement("div");
-    row.className="qi-row "+(role==="user"?"qi-user":"qi-bot");
-    const b=document.createElement("div");
-    b.className="qi-bubble"; b.textContent=text||"";
-    row.appendChild(b); body.appendChild(row); body.scrollTop=body.scrollHeight;
+  function push(role, text) {
+    const row = document.createElement("div");
+    row.className = "qi-row " + (role === "user" ? "qi-user" : "qi-bot");
+    const b = document.createElement("div");
+    b.className = "qi-bubble";
+    b.textContent = text || "";
+    row.appendChild(b);
+    body.appendChild(row);
+    body.scrollTop = body.scrollHeight;
     return b;
   }
 
-function sampleQuickQuestions() {
-  const all = [
-    "When will this be back in stock?",
-    "What does 'sold out' mean?",
-    "Can I schedule a delivery?",
-    "Why is my package routed to another state?",
-    "How can I make the flavour stronger?",
-    "Can I change my address after ordering?",
-    "Do you have a guarantee?",
-    "Can I buy this in-store?",
-    "Is it FDA or TGA approved?",
-    "Do you ship internationally?",
-    "Do you have Afterpay?",
-    "How long does shipping take?",
-    "What's your refund policy?",
-    "What's inside the flavour cores?",
-    "Why is the flavour weak?",
-    "Do I need to activate a core?",
-    "Is it safe to use while pregnant?",
-    "Is QUIT IT safe to use?",
-    "Does it feel like a cigarette?",
-    "How long do the cores last?"
-  ];
-  return all.sort(() => Math.random() - 0.5).slice(0, 6);
-}
+  // Updated quick questions (your list)
+  function sampleQuickQuestions() {
+    const all = [
+  
+      "Can I change my address after ordering?", 
+      "Do you have Afterpay?",
+      "How long does shipping take?",
+      "What's your refund policy?",
+      "What's inside the flavour cores?",
+      "Is QUIT IT safe to use?",
+      "Does it feel like a cigarette?",
+      "How long do the cores last?"
+    ];
+    return all.sort(() => Math.random() - 0.5).slice(0, 6);
+  }
 
-  function renderChips(){
-    chips.innerHTML="";
-    sampleQuickQuestions().forEach(q=>{
-      const btn=document.createElement("button");
-      btn.className="qi-chip"; btn.textContent=q; btn.onclick=()=>ask(q);
+  function renderChips() {
+    chips.innerHTML = "";
+    sampleQuickQuestions().forEach(q => {
+      const btn = document.createElement("button");
+      btn.className = "qi-chip";
+      btn.textContent = q;
+      btn.onclick = () => ask(q);
       chips.appendChild(btn);
     });
   }
 
-  // Supports SSE and JSON
-  async function ask(text){
-    push("user",text); chips.innerHTML="";
-    const botBubble=push("assistant","…");
+  // Handles JSON or SSE responses
+  let pending = false;
+  async function ask(text) {
+    if (pending) return;
+    pending = true;
+    sendBtn.disabled = true;
 
-    try{
-      const res=await fetch(API_BASE+"/api/chat",{
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body:JSON.stringify({ message:text, text })
+    push("user", text);
+    chips.innerHTML = "";
+    const botBubble = push("assistant", "…");
+
+    try {
+      const res = await fetch(API_BASE + "/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text, text })
       });
 
-      if(!res.ok){
-        const err=await res.text().catch(()=> "");
-        botBubble.textContent=`Server error (${res.status}). ${err.slice(0,200)}`;
-        renderChips(); return;
+      if (!res.ok) {
+        const err = await res.text().catch(() => "");
+        botBubble.textContent = `Server error (${res.status}). ${err.slice(0, 200)}`;
+        renderChips();
+        return;
       }
 
-      const ctype=(res.headers.get("content-type")||"").toLowerCase();
+      const ctype = (res.headers.get("content-type") || "").toLowerCase();
 
-      if(ctype.includes("text/event-stream")){
-        const reader=res.body.getReader();
-        const dec=new TextDecoder(); let buf="", acc="";
-        while(true){
-          const {value,done}=await reader.read(); if(done) break;
-          buf+=dec.decode(value,{stream:true});
-          const lines=buf.split("\n"); buf=lines.pop()||"";
-          for(const line of lines){
-            const t=line.trim(); if(!t.startsWith("data:")) continue;
-            const payload=t.slice(5).trim(); if(payload==="[DONE]") continue;
-            try{
-              const json=JSON.parse(payload);
-              const delta=json.choices?.[0]?.delta?.content||"";
-              if(delta){ acc+=delta; botBubble.textContent=acc; body.scrollTop=body.scrollHeight; }
-            }catch{}
+      if (ctype.includes("text/event-stream")) {
+        const reader = res.body.getReader();
+        const dec = new TextDecoder();
+        let buf = "", acc = "";
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          buf += dec.decode(value, { stream: true });
+          const lines = buf.split("\n");
+          buf = lines.pop() || "";
+          for (const line of lines) {
+            const t = line.trim();
+            if (!t.startsWith("data:")) continue;
+            const payload = t.slice(5).trim();
+            if (payload === "[DONE]") continue;
+            try {
+              const json = JSON.parse(payload);
+              const delta = json.choices?.[0]?.delta?.content || "";
+              if (delta) {
+                acc += delta;
+                botBubble.textContent = acc;
+                body.scrollTop = body.scrollHeight;
+              }
+            } catch {}
           }
         }
-        renderChips(); return;
+        renderChips();
+        return;
       }
 
-      const data=await res.json().catch(()=> ({}));
-      const answer=data.answer||data.message||data.choices?.[0]?.message?.content||
+      const data = await res.json().catch(() => ({}));
+      const answer =
+        data.answer ||
+        data.message ||
+        data.choices?.[0]?.message?.content ||
         "I’m not 100% sure on that one! Could you email support@quititaus.com.au so we can help?";
-      botBubble.textContent=answer; renderChips();
-
-    }catch(e){
+      botBubble.textContent = answer;
+      renderChips();
+    } catch (e) {
       console.error(e);
-      botBubble.textContent="Network error reaching the chat service.";
+      botBubble.textContent = "Network error reaching the chat service.";
+    } finally {
+      pending = false;
+      sendBtn.disabled = false;
     }
   }
 
-  launch.onclick=()=>{
-    const visible=box.style.display==="block";
-    box.style.display=visible?"none":"block";
-    if(!visible && body.children.length===0){
-      push("assistant","Hey! I can help with shipping, flavours, safety, returns — ask me anything.");
+  launch.onclick = () => {
+    const visible = box.style.display === "block";
+    box.style.display = visible ? "none" : "block";
+    if (!visible && body.children.length === 0) {
+      push("assistant", "Hey! I can help with shipping, flavours, safety, returns — ask me anything 😊");
       renderChips();
     }
   };
-  sendBtn.onclick=()=>{
-    const t=(input.value||"").trim(); if(!t) return;
-    input.value=""; ask(t);
+  sendBtn.onclick = () => {
+    const t = (input.value || "").trim();
+    if (!t) return;
+    input.value = "";
+    ask(t);
   };
-  input.addEventListener("keydown",(e)=>{
-    if(e.key==="Enter"){ e.preventDefault(); sendBtn.click(); }
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") { e.preventDefault(); sendBtn.click(); }
   });
 
   // optional debug
   window.QI_CHAT = { API_BASE };
 })();
-
 
