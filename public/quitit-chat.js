@@ -80,11 +80,8 @@
   // Updated quick questions (your list)
   function sampleQuickQuestions() {
     const all = [
-  
-      "Can I change my address after ordering?", 
       "Do you have Afterpay?",
       "How long does shipping take?",
-      "What's your refund policy?",
       "What's inside the flavour cores?",
       "Is QUIT IT safe to use?",
       "Does it feel like a cigarette?",
