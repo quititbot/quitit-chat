@@ -452,7 +452,7 @@ export default async function handler(req, res) {
       /\bwhat('| i)?s\s*in\b/i
     ],
     answer:
-      "we have a detailed ingredients list on our FAQ page titled - Whats inside quit it flavour cores"
+      "We have a detailed ingredients list on our FAQ page titled - Whats inside quit it flavour cores"
   },
   {
     id: "leave-review",
