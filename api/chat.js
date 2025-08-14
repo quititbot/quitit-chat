@@ -444,6 +444,36 @@ export default async function handler(req, res) {
       answer:
         "You can’t refill a core — they’re designed for single use and last around **5 days**. Once empty, replace it with a fresh one."
     },
+     {
+    id: "ingredients-list",
+    tests: [
+      /\b(what('| i)?s|whats)\s*(inside|in)\s*(quit\s*it\s*)?(flavou?r\s*cores?|cores?)\b/i,
+      /\bingredients?\b/i,
+      /\bwhat('| i)?s\s*in\b/i
+    ],
+    answer:
+      "Here’s the full ingredients list for our Flavour Cores:\n\nhttps://quititaus.com.au/pages/frequently-asked-questions#whats-inside-quit-it-flavour-cores"
+  },
+  {
+    id: "leave-review",
+    tests: [
+      /\bhow\b.*\bleave\b.*\breview\b/i,
+      /\bleave\b.*\breview\b/i,
+      /\bwrite\b.*\breview\b/i
+    ],
+    answer:
+      "You’ll receive an email encouraging you to leave a review a few days after your order arrives. Keep an eye on your inbox 📬"
+  },
+  {
+    id: "no-email-reply",
+    tests: [
+      /\bwhy\b.*(no|not)\s*(reply|replied|respond(ing)?)/i,
+      /\bnot\s*(heard|hearing)\s*back\b/i,
+      /\b(no|not)\s*(answer|response)\b.*(email|message)/i
+    ],
+    answer:
+      "Our team are very busy, but don’t worry — someone will get back to you shortly 🙂"
+  },
     {
       id: "cleaners",
       tests: [/clean(er|ing).*(inhaler|device|quit\s*it)/i],
