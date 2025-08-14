@@ -452,7 +452,7 @@ export default async function handler(req, res) {
       /\bwhat('| i)?s\s*in\b/i
     ],
     answer:
-      "Here’s the full ingredients list for our Flavour Cores:\n\nhttps://quititaus.com.au/pages/frequently-asked-questions#whats-inside-quit-it-flavour-cores"
+      "we have a detailed ingredients list on our FAQ page titled - Whats inside quit it flavour cores"
   },
   {
     id: "leave-review",
